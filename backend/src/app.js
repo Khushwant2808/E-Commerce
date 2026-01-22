@@ -7,8 +7,8 @@ app.use(cors());
 app.use(express.json());
 
 // test route
-app.get("/", (req, res) => {
 app.use("/api/auth", require("./routes/authRoutes"));
+app.get("/", (req, res) => {
 
   res.send("E-commerce API is running");
 });
