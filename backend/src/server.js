@@ -1,6 +1,7 @@
 require("dotenv").config({ path: require("path").resolve(__dirname, "../.env") });
 
 require("./models/User");
+require("./models/Product");
 
 const app = require("./app");
 const sequelize = require("./config/database");
