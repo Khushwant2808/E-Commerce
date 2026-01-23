@@ -31,6 +31,10 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       defaultValue: "user",
     },
+    cartId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   },
   {
     tableName: "users",
