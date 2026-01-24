@@ -34,14 +34,15 @@ const Product = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
+    isFeatured: { type: DataTypes.BOOLEAN, defaultValue: false },
+
+    rating: { type: DataTypes.FLOAT, defaultValue: 0 },
+    ratingCount: { type: DataTypes.INTEGER, defaultValue: 0 },
   },
   {
     tableName: "products",
     timestamps: true,
   }
 );
-
-
-
-
 module.exports = Product;

@@ -28,13 +28,19 @@ const User = sequelize.define(
     },
 
     role: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM("user","admin"), 
       defaultValue: "user",
     },
-    cartId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
+
+    phoneNumberProvided:{ type:  DataTypes.BOOLEAN, defaultValue: false},
+    addressProvided:{ type:  DataTypes.BOOLEAN, defaultValue: false},
+
+    canSell: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    }
+    
   },
   {
     tableName: "users",
