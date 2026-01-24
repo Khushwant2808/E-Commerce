@@ -50,8 +50,12 @@ async function login(req, res) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const user = await User.findOne({ where: { email } });
-
+    const user = await User.findOne({
+      where: { email },
+      attributes: ["id", "password", "name", "role"], //OPTIMISATION
+      raw: true
+    });
+    
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -90,7 +94,7 @@ async function verifyToken(req, res) {
     return res.status(401).json({ message: "Unauthorized" });
   }
   res.json({ 
-    message: "Welcome to your profile!", 
+    message: "Token Verification Working!", 
     userId: req.user.id 
   });
 }

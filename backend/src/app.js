@@ -3,8 +3,6 @@ const cors = require("cors");
 const { limiter, authLimiter } = require("./middlewares/authMiddleware");
 const app = express();
 
-
-
 app.use(cors());
 app.use(express.json());
 app.use(limiter)

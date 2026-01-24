@@ -7,4 +7,5 @@ const { authenticateToken } = require("../middlewares/authMiddleware")
 router.post("/register", register);
 router.post("/login", login);
 router.get('/api/profile', authenticateToken, verifyToken);
+
 module.exports = router;

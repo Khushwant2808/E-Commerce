@@ -6,5 +6,4 @@ const { authenticateToken } = require("../middlewares/authMiddleware");
 router.get("/", authenticateToken, getCartItems);
 router.post("/add",authenticateToken, addItemToCart);
 
-
 module.exports = router;
