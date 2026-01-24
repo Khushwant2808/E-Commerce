@@ -10,6 +10,7 @@ app.use(limiter)
 app.use("/api/cart", require("./routes/cartRotutes"));
 app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/auth",authLimiter, require("./routes/authRoutes"));
+app.use("/api/wish", require("./routes/wishRoutes"));
 
 app.get("/", (req, res) => {
   res.send("E-commerce API is running");

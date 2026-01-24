@@ -26,7 +26,7 @@ const authenticateToken = (req, res, next) => {
       const verified = jwt.verify(token, process.env.JWT_SECRET);
       req.user = verified;
       if (process.env.LOG !== "false"){
-        console.log("User Verified")
+        console.log("User Verified", req.user.id)
       }
       next();
   } catch (err) {
