@@ -13,21 +13,24 @@ async function seedUsers() {
       email: "admin@admin.com",
       password,
       role: "admin",
-      canSell: true
+      canSell: true,
+      phoneNumberProvided: true
     },
     {
       name: "User One",
       email: "user1@test.com",
       password,
       role: "user",
-      canSell: false
+      canSell: false,
+      phoneNumberProvided: true
     },
     {
       name: "Yash",
       email: "ayash@gmail.com",
       password,
       role: "user",
-      canSell: true
+      canSell: true,
+      phoneNumberProvided: true
     }
   ]);
 }
