@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+const { ValidationErrorItem } = require("sequelize");
 
 async function register(req, res) {
   try {
@@ -62,7 +63,7 @@ async function login(req, res) {
     }
 
     const token = jwt.sign(
-      { id: user.id, name: user.name },
+      { id: user.id ,name : user.name},
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -83,7 +84,20 @@ async function login(req, res) {
   }
 }
 
+
+async function verifyToken(req, res) {
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  res.json({ 
+    message: "Welcome to your profile!", 
+    userId: req.user.id 
+  });
+}
+
+
 module.exports = {
   register,
   login,
+  verifyToken,
 };

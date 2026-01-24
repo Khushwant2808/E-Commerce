@@ -11,8 +11,8 @@ async function getOrCreateCart(userId) {
 
 async function addItemToCart(req, res) {
     try {
-        const userId = req.body.id;
         const { productId, quantity } = req.body;
+        const userId = req.user.id;
         if (!productId || quantity <= 0) {
             return res.status(400).json({ message: "Invalid product ID or quantity" });
         }
@@ -41,7 +41,7 @@ async function addItemToCart(req, res) {
 }
 async function getCartItems(req, res) {
     try {
-        const userId = req.params.id;
+        const userId = req.user.id;
         const cart = await Cart.findOne({ where: { userId } });
         if (!cart) {
             return res.status(404).json({ message: "Cart not found" });
