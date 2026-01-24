@@ -1,19 +1,19 @@
-require("dotenv").config({ path: require("path").resolve(__dirname, "../.env") });
 const Product = require("../models/Product");
 
 async function addProduct(req, res) {
     try {
-        const { name, description, price, stock,imageUrl } = req.body;
-        if(!name || !price) {
-            return res.status(400).json({ message: "Name and Price are required" });
+        const { name, description, price, stock, imageUrl } = req.body;
+        const userId = req.user.id
+        if(!name || !price || !userId) {
+            return res.status(400).json({ message: "Name and Price and User are required" });
         }
-
         const product = await Product.create({
             name,
             description,
             price,
             stock,
-            imageUrl
+            imageUrl,
+            userId
         });
 
         if (process.env.LOG !== "false"){

@@ -19,7 +19,9 @@ async function register(req, res) {
       email,
       password: hashedPassword,
     });
-
+    if (process.env.LOG !== "false"){
+      console.log("User registered")
+    }
     return res.status(201).json({
       message: "User registered successfully",
       user: {
@@ -63,6 +65,9 @@ async function login(req, res) {
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
+    if (process.env.LOG !== "false"){
+      console.log("User logged in")
+    }
 
     return res.status(200).json({
       message: "Login successful",

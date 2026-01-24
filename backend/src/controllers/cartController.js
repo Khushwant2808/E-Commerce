@@ -1,6 +1,5 @@
 const Cart = require("../models/Cart");
 const CartItem = require("../models/CartItems");
-require("dotenv").config({ path: require("path").resolve(__dirname, "../.env") });
 
 
 async function getOrCreateCart(userId) {
