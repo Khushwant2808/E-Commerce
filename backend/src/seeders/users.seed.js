@@ -5,7 +5,7 @@ async function seedUsers() {
   const count = await User.count();
   if (count > 0) return;
 
-  const password = await bcrypt.hash("admin123", 10);
+  const password = await bcrypt.hash("1234", 10);
 
   await User.bulkCreate([
     {
@@ -21,6 +21,13 @@ async function seedUsers() {
       password,
       role: "user",
       canSell: false
+    },
+    {
+      name: "Yash",
+      email: "ayash@gmail.com",
+      password,
+      role: "user",
+      canSell: true
     }
   ]);
 }
