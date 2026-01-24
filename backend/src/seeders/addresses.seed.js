@@ -18,4 +18,3 @@ async function seedAddresses() {
 }
 
 module.exports = seedAddresses;
-
