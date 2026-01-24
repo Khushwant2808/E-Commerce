@@ -10,6 +10,7 @@ const Order = require("./Order");
 const OrderItem = require("./OrderItem");
 const Payment = require("./Payment");
 const Review = require("./Review")
+const Wishlist = require("./Wishlist")
 
 User.hasMany(PhoneNumber, { foreignKey: "userId", onDelete: "CASCADE" });
 PhoneNumber.belongsTo(User, { foreignKey: "userId" });
@@ -50,6 +51,9 @@ Review.belongsTo(User, { foreignKey: "userId" });
 User.hasMany(Product, { foreignKey: "userId", onDelete: "CASCADE" });
 Product.belongsTo(User, { foreignKey: "userId" });
 
+User.hasMany(Wishlist, { foreignKey: "userId", onDelete:"CASCADE" });
+Wishlist.belongsTo(User, { foreignKey: "userId" });
+
 module.exports = {
   sequelize,
   User,
@@ -61,5 +65,6 @@ module.exports = {
   Order,
   OrderItem,
   Payment,
-  Review
+  Review,
+  Wishlist
 };
