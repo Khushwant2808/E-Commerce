@@ -1,3 +1,4 @@
+require("dotenv").config({ path: require("path").resolve(__dirname, "../.env") });
 const { User } = require("../models");
 
 const verifyIfSeller = async (req, res, next) => {
@@ -15,7 +16,9 @@ const verifyIfSeller = async (req, res, next) => {
     if (!user.canSell && user.role !== "admin") {
       return res.status(403).json({ message: "Seller access required" });
     }
-
+    if (process.env.LOG !== "false"){
+        console.log("Seller Verified")
+    }
     next();
   } catch (err) {
     res.status(500).json({ message: "Authorization failed" });

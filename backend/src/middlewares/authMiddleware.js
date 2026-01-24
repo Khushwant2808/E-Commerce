@@ -1,5 +1,6 @@
 const rateLimit = require("express-rate-limit");
 const jwt = require('jsonwebtoken');
+require("dotenv").config({ path: require("path").resolve(__dirname, "../.env") });
 
 const limiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
@@ -25,6 +26,10 @@ const authenticateToken = (req, res, next) => {
   try {
       const verified = jwt.verify(token, process.env.JWT_SECRET);
       req.user = verified;
+      if (process.env.LOG !== "false"){
+        console.log(process.env.LOG)
+        console.log("User Verified")
+      }
       next();
   } catch (err) {
     const errorMessage = err.name === "TokenExpiredError" 

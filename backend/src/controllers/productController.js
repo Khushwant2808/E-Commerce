@@ -1,3 +1,4 @@
+require("dotenv").config({ path: require("path").resolve(__dirname, "../.env") });
 const Product = require("../models/Product");
 
 async function addProduct(req, res) {
@@ -14,6 +15,10 @@ async function addProduct(req, res) {
             stock,
             imageUrl
         });
+
+        if (process.env.LOG !== "false"){
+            console.log("Product Added")
+        }; 
 
         return res.status(201).json({
             message: "Product added successfully",

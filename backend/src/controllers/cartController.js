@@ -1,5 +1,7 @@
 const Cart = require("../models/Cart");
 const CartItem = require("../models/CartItems");
+require("dotenv").config({ path: require("path").resolve(__dirname, "../.env") });
+
 
 async function getOrCreateCart(userId) {
   const [cart] = await Cart.findOrCreate({
@@ -28,7 +30,9 @@ async function addItemToCart(req, res) {
             cartItem.quantity += quantity;
             await cartItem.save();
         }
-
+        if (process.env.LOG !== "false"){
+            console.log("Item added to Cart")
+        }
         return res.status(200).json({
             message: "Item added to cart successfully",
             cartItem

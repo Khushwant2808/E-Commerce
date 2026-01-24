@@ -1,4 +1,5 @@
 const { Sequelize } = require("sequelize");
+require("dotenv").config({ path: require("path").resolve(__dirname, "../../.env") });
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,
@@ -7,7 +8,7 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     dialect: "postgres",
-    logging: true, // to keep logs clean change to false
+    logging: process.env.LOG === "full" ? console.log : false
   }
 );
 
