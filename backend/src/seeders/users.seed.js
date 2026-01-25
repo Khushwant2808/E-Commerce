@@ -28,6 +28,13 @@ async function seedUsers() {
       password,
       role: "user",
       canSell: true
+    },
+    {
+      name: "Khushwant",
+      email: "khush@gmail.com",
+      password,
+      role: "user",
+      canSell: true
     }
   ]);
 }
