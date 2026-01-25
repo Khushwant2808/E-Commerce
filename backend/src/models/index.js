@@ -9,8 +9,8 @@ const Address = require("./Address");
 const Order = require("./Order");
 const OrderItem = require("./OrderItem");
 const Payment = require("./Payment");
-const Review = require("./Review")
-const Wishlist = require("./Wishlist")
+const Review = require("./Review");
+const Wishlist = require("./Wishlist");
 
 User.hasOne(PhoneNumber, { foreignKey: "userId", onDelete: "CASCADE" });
 PhoneNumber.belongsTo(User, { foreignKey: "userId" });
@@ -24,13 +24,13 @@ Order.belongsTo(User, { foreignKey: "userId" });
 Order.hasMany(OrderItem, { foreignKey: "orderId", onDelete: "CASCADE" });
 OrderItem.belongsTo(Order, { foreignKey: "orderId" });
 
-Product.hasMany(OrderItem, { foreignKey: "productId" });
+Product.hasMany(OrderItem, { foreignKey: "productId", onDelete: "CASCADE" });
 OrderItem.belongsTo(Product, { foreignKey: "productId" });
 
 Order.hasOne(Payment, { foreignKey: "orderId", onDelete: "CASCADE" });
 Payment.belongsTo(Order, { foreignKey: "orderId" });
 
-Address.hasMany(Order, { foreignKey: "addressId" });
+Address.hasMany(Order, { foreignKey: "addressId", onDelete: "CASCADE" });
 Order.belongsTo(Address, { foreignKey: "addressId" });
 
 User.hasOne(Cart, { foreignKey: "userId", onDelete: "CASCADE" });
@@ -39,7 +39,7 @@ Cart.belongsTo(User, { foreignKey: "userId" });
 Cart.hasMany(CartItem, { foreignKey: "cartId", onDelete: "CASCADE" });
 CartItem.belongsTo(Cart, { foreignKey: "cartId" });
 
-Product.hasMany(CartItem, { foreignKey: "productId" });
+Product.hasMany(CartItem, { foreignKey: "productId", onDelete: "CASCADE" });
 CartItem.belongsTo(Product, { foreignKey: "productId" });
 
 Product.hasMany(Review, { foreignKey: "productId", onDelete: "CASCADE" });
@@ -51,11 +51,11 @@ Review.belongsTo(User, { foreignKey: "userId" });
 User.hasMany(Product, { foreignKey: "userId", onDelete: "CASCADE" });
 Product.belongsTo(User, { foreignKey: "userId" });
 
-User.hasMany(Wishlist, { foreignKey: "userId", onDelete:"CASCADE" });
+User.hasMany(Wishlist, { foreignKey: "userId", onDelete: "CASCADE" });
 Wishlist.belongsTo(User, { foreignKey: "userId" });
 
-User.hasMany(Address, { foreignKey: "userId", onDelete: "CASCADE" })
-Address.belongsTo(User, { foreignKey: "userId" } )
+Product.hasMany(Wishlist, { foreignKey: "productId", onDelete: "CASCADE" });
+Wishlist.belongsTo(Product, { foreignKey: "productId" });
 
 module.exports = {
   sequelize,
