@@ -12,7 +12,7 @@ async function seedPayments() {
       orderId: o.id,
       gateway: "mock",
       amount: o.totalAmount,
-      status: o.paymentStatus === "success" ? "success" : "created",
+      status: o.paymentStatus === "success" ? "success" : "pending",
       transactionId: `TXN_${Date.now()}_${o.id}`
     }))
   );

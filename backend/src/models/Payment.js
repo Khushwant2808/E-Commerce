@@ -11,8 +11,8 @@ const Payment = sequelize.define("Payment", {
   amount: { type: DataTypes.DECIMAL(10,2), allowNull: false },
 
   status: {
-    type: DataTypes.ENUM("created", "success", "failed", "refunded"),
-    defaultValue: "created"
+    type: DataTypes.ENUM("pending", "success", "failed", "refunded"),
+    defaultValue: "pending"
   },
   method: { 
     type: DataTypes.ENUM("cod", "online"),

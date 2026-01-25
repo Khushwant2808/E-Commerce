@@ -79,7 +79,7 @@ async function placeOrder(req, res, next) {
                     productId: product.id,
                     quantity: item.quantity,
                     price: product.price,
-                    status: "pending"
+                    status: "pending",
                 },
                 { transaction }
             );
