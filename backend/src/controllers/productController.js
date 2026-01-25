@@ -1,24 +1,27 @@
-require("dotenv").config({ path: require("path").resolve(__dirname, "../.env") });
 const Product = require("../models/Product");
 
 async function addProduct(req, res) {
     try {
-        const { name, description, price, stock,imageUrl } = req.body;
-        if(!name || !price) {
-            return res.status(400).json({ message: "Name and Price are required" });
+        const { name, description, price, stock, imageUrl } = req.body;
+        const userId = req.user.id
+        if (!name || !price || !userId) {
+            return res.status(400).json({ message: "Name and Price and User are required" });
         }
-
+        if (typeof price !== "number" || price <= 0) {
+            return res.status(400).json({ message: "Price must be a positive number" });
+        }
         const product = await Product.create({
             name,
             description,
             price,
             stock,
-            imageUrl
+            imageUrl,
+            userId
         });
 
-        if (process.env.LOG !== "false"){
+        if (process.env.LOG !== "false") {
             console.log("Product Added")
-        }; 
+        };
 
         return res.status(201).json({
             message: "Product added successfully",
@@ -34,6 +37,9 @@ async function addProduct(req, res) {
 async function getProducts(req, res) {
     try {
         const products = await Product.findAll();
+        if (!products.length) {
+            return res.status(404).json({ message: "No products found" });
+        }
         return res.status(200).json(products);
     }
     catch (error) {
@@ -45,6 +51,9 @@ async function getProducts(req, res) {
 async function getProductById(req, res) {
     try {
         const { id } = req.params;
+        if (!id || isNaN(id)) {
+            return res.status(400).json({ message: "Invalid product ID" });
+        }
         const product = await Product.findByPk(id);
         if (!product) {
             return res.status(404).json({ message: "Product not found" });
