@@ -66,6 +66,7 @@ async function placeOrder(req, res, next) {
                 totalAmount,
                 addressId: address.id,
                 status: "pending",
+                paymentStatus: "pending",
             },
             { transaction }
         );
@@ -136,88 +137,93 @@ async function updateOrderItemStatus(req, res, next) {
         const { itemId } = req.params;
         const { status } = req.body;
 
-        const allowed = ["pending", "shipped", "delivered", "returned"];
+        const allowed = ["pending", "shipped", "delivered", "cancelled", "returned"];
         if (!allowed.includes(status)) {
             return res.status(400).json({ message: "Invalid status value" });
         }
 
         const orderItem = await OrderItem.findByPk(itemId);
-        if (!orderItem) {
-            return res.status(404).json({ message: "Order Item not found" });
+        if (!orderItem) return res.status(404).json({ message: "Order Item not found" });
+
+        // --- NEW: CHECK PAYMENT BEFORE DELIVERY ---
+        if (status === "delivered") {
+            const order = await Order.findByPk(orderItem.orderId);
+            
+            // 1. If status is Paid, allow.
+            // 2. If status is Failed, BLOCK.
+            // 3. If Pending, check if COD (Allow) or Online (Block).
+            
+            if (order.paymentStatus === "failed") {
+                return res.status(400).json({ message: "Cannot deliver. Payment has failed." });
+            }
+
+            if (order.paymentStatus !== "paid") {
+                // Check latest payment method
+                const lastPayment = await Payment.findOne({
+                    where: { orderId: order.id },
+                    order: [["createdAt", "DESC"]]
+                });
+
+                // If no payment record OR last method was online => BLOCK
+                if (!lastPayment || lastPayment.method === "online") {
+                    return res.status(400).json({ 
+                        message: "Cannot mark delivered. Order is not paid (Online Pending)." 
+                    });
+                }
+                // If COD, we allow it (assuming cash collected at door)
+            }
         }
+        // ------------------------------------------
 
         orderItem.status = status;
         await orderItem.save();
 
+        // Auto-Update Parent Order
         const allItems = await OrderItem.findAll({ where: { orderId: orderItem.orderId } });
-
-        const allComplete = allItems.every(item =>
-            ["shipped", "delivered", "returned"].includes(item.status)
+        const allComplete = allItems.every(item => 
+            ["shipped", "delivered", "cancelled", "returned"].includes(item.status)
         );
 
         if (allComplete) {
             let newStatus = "shipped";
-
             if (status === "delivered") newStatus = "delivered";
             if (status === "cancelled") newStatus = "cancelled";
 
-            await Order.update(
-                { status: newStatus },
-                { where: { id: orderItem.orderId } }
-            );
-            console.log(`Auto-updated Parent Order #${orderItem.orderId} to '${newStatus}'`);
+            await Order.update({ status: newStatus }, { where: { id: orderItem.orderId } });
         }
 
-        return res.status(200).json({
-            message: "Item status updated",
-            orderItem
-        });
+        return res.status(200).json({ message: "Item status updated", orderItem });
 
     } catch (error) {
         next(error);
     }
 }
 
+// ... cancelOrder & updateOrderStatus (Legacy) ...
 async function cancelOrder(req, res, next) {
     try {
         const { id } = req.params;
         const userId = req.user.id;
-
         const order = await Order.findOne({ where: { id, userId } });
-
-        if (!order) {
-            return res.status(404).json({ message: "Order not found" });
-        }
-        if (order.status !== "pending") {
-            return res.status(400).json({ message: "Order cannot be cancelled" });
-        }
+        if (!order) return res.status(404).json({ message: "Order not found" });
+        if (order.status !== "pending") return res.status(400).json({ message: "Order cannot be cancelled" });
 
         order.status = "cancelled";
         await order.save();
-
         return res.status(200).json({ message: "Order cancelled", order });
-    } catch (error) {
-        next(error);
-    }
+    } catch (error) { next(error); }
 }
 
 async function updateOrderStatus(req, res, next) {
     try {
         const { id } = req.params;
         const { status } = req.body;
-
         const order = await Order.findByPk(id);
-        if (!order) {
-            return res.status(404).json({ message: "Order not found" });
-        }
-
+        if (!order) return res.status(404).json({ message: "Order not found" });
         order.status = status;
         await order.save();
-
         return res.status(200).json({ message: "Order status updated", order });
-    } catch (error) {
-        next(error);
-    }
+    } catch (error) { next(error); }
 }
 
 module.exports = {

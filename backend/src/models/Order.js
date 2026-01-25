@@ -13,7 +13,10 @@ const Order = sequelize.define("Order", {
     defaultValue: "pending"
   },
 
-
+  paymentStatus: {
+    type: DataTypes.ENUM("pending", "paid", "failed", "refunded"),
+    defaultValue: "pending"
+  },
   addressId: { type: DataTypes.INTEGER, allowNull: false },
 
 }, {

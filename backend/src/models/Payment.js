@@ -14,6 +14,10 @@ const Payment = sequelize.define("Payment", {
     type: DataTypes.ENUM("created", "success", "failed", "refunded"),
     defaultValue: "created"
   },
+  method: { 
+    type: DataTypes.ENUM("cod", "online"),
+    defaultValue: "online" 
+  },
 
   transactionId: { type: DataTypes.STRING },
 
