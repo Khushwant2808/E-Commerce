@@ -1,8 +1,6 @@
-const { map } = require("../app");
-const {Cart , CartItem , Order , OrderItem , Product, Address , PhoneNumber, sequelize}= require("../models");
-const { Sequelize } = require("sequelize");
+const { Cart, CartItem, Order, OrderItem, Product, Address, PhoneNumber, sequelize } = require("../models");
 
-async function getOrderdetails(req,res) {
+async function getMyOrders(req, res) {
     try {
         const userId = req.user.id;
 
@@ -151,4 +149,91 @@ async function placeOrder(req, res) {
 
 
 
-module.exports = {getOrderdetails, placeOrder};
+async function getOrderById(req, res) {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+
+        const order = await Order.findOne({
+            where: { id, userId },
+            include: [OrderItem]
+        });
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        return res.status(200).json(order);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+async function cancelOrder(req, res) {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+
+        const order = await Order.findOne({ where: { id, userId } });
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        if (order.status !== "pending") {
+            return res.status(400).json({ message: "Order cannot be cancelled" });
+        }
+
+        order.status = "cancelled";
+        await order.save();
+
+        return res.status(200).json({
+            message: "Order cancelled",
+            order
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+
+async function updateOrderStatus(req, res) {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const allowed = ["pending", "shipped", "delivered", "cancelled"];
+
+        if (!allowed.includes(status)) {
+            return res.status(400).json({ message: "Invalid status value" });
+        }
+
+        const order = await Order.findByPk(id);
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        order.status = status;
+        await order.save();
+
+        return res.status(200).json({
+            message: "Order status updated",
+            order
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+module.exports = {
+    placeOrder,
+    getOrderById,
+    cancelOrder,
+    getMyOrders,
+    updateOrderStatus
+}
