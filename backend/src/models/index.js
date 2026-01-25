@@ -27,7 +27,7 @@ OrderItem.belongsTo(Order, { foreignKey: "orderId" });
 Product.hasMany(OrderItem, { foreignKey: "productId", onDelete: "CASCADE" });
 OrderItem.belongsTo(Product, { foreignKey: "productId" });
 
-Order.hasOne(Payment, { foreignKey: "orderId", onDelete: "CASCADE" });
+Order.hasMany(Payment, { foreignKey: "orderId", onDelete: "CASCADE" });
 Payment.belongsTo(Order, { foreignKey: "orderId" });
 
 Address.hasMany(Order, { foreignKey: "addressId", onDelete: "CASCADE" });

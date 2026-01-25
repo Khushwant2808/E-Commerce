@@ -91,7 +91,7 @@ async function placeOrder(req, res, next) {
             where: { cartId: cart.id },
             transaction,
         });
-
+        
         await transaction.commit();
 
         return res.status(201).json({
