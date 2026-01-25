@@ -9,6 +9,13 @@ async function seedUsers() {
 
   await User.bulkCreate([
     {
+      name: "Yash",
+      email: "ayash@gmail.com",
+      password,
+      role: "user",
+      canSell: true
+    },
+    {
       name: "Admin",
       email: "admin@admin.com",
       password,
@@ -23,13 +30,6 @@ async function seedUsers() {
       role: "user",
       canSell: false,
       phoneNumberProvided: true
-    },
-    {
-      name: "Yash",
-      email: "ayash@gmail.com",
-      password,
-      role: "user",
-      canSell: true
     },
     {
       name: "Khushwant",
