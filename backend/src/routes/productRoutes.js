@@ -1,11 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const { addProduct, updateStock, getProducts } = require("../controllers/productController");
-const { authenticateToken } = require("../middlewares/authMiddleware")
-const { verifyIfSeller } = require("../middlewares/productMiddleware")
+
+const { getProducts, updateStock, updateProductMeta, addProduct, showProducts } = require("../controllers/productController");
+const { authenticateToken } = require("../middlewares/authMiddleware");
+const { verifyIfSeller } = require("../middlewares/productMiddleware");
 
 router.get("/", getProducts);
-router.put("/", authenticateToken, verifyIfSeller, updateStock);
 router.post("/", authenticateToken, verifyIfSeller, addProduct);
+router.put("/stock", authenticateToken, verifyIfSeller, updateStock);
+router.put("/meta", authenticateToken, verifyIfSeller, updateProductMeta);
+router.get("/show",authenticateToken, verifyIfSeller, showProducts)
 
 module.exports = router;
