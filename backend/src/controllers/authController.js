@@ -3,7 +3,7 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const { Sequelize } = require("sequelize");
 
-async function register(req, res) {
+async function register(req, res, next) {
   try {
     const { name, email, password } = req.body;
 
@@ -47,19 +47,17 @@ async function register(req, res) {
     });
 
   } catch (error) {
-
     if (error instanceof Sequelize.ValidationError) {
       return res.status(400).json({
         message: "Validation error",
         details: error.errors.map(e => e.message)
       });
     }
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 }
 
-async function login(req, res) {
+async function login(req, res, next) {
   try {
     const { email, password } = req.body;
 
@@ -84,7 +82,7 @@ async function login(req, res) {
     }
 
     const token = jwt.sign(
-      { 
+      {
         id: user.id,
         name: user.name,
         role: user.role,
@@ -111,13 +109,11 @@ async function login(req, res) {
     });
 
   } catch (error) {
-
     if (error instanceof Sequelize.DatabaseError) {
       return res.status(500).json({ message: "Database error" });
     }
 
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 }
 

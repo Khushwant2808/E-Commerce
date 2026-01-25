@@ -1,11 +1,12 @@
 const { Cart, CartItem, Order, OrderItem, Product, Address, PhoneNumber, sequelize } = require("../models");
 
-async function getMyOrders(req, res) {
+async function getMyOrders(req, res, next) {
     try {
         const userId = req.user.id;
 
         const orders = await Order.findAll({
             where: { userId },
+            order: [["createdAt", "DESC"]],
             include: [
                 {
                     model: OrderItem,
@@ -19,20 +20,16 @@ async function getMyOrders(req, res) {
         }
 
         return res.status(200).json(orders);
-    }
-    catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server error" });
+    } catch (error) {
+        next(error);
     }
 }
 
-async function placeOrder(req, res) {
+async function placeOrder(req, res, next) {
     const transaction = await sequelize.transaction();
 
     try {
         const userId = req.user.id;
-
-        /* -------------------- Fetch Address -------------------- */
 
         const address = await Address.findOne({
             where: { userId },
@@ -40,58 +37,28 @@ async function placeOrder(req, res) {
         });
 
         if (!address) {
-            return res.status(400).json({
-                message: "No address found for this user",
-            });
+            await transaction.rollback();
+            return res.status(400).json({ message: "No address found for this user" });
         }
-
-        /* -------------------- Fetch Phone Number -------------------- */
-
-        const phone = await PhoneNumber.findOne({
-            where: { userId },
-        });
-
-        if (!phone) {
-            return res.status(400).json({
-                message: "No phone number found for this user",
-            });
-        }
-
-        /* -------------------- Fetch Cart -------------------- */
 
         const cart = await Cart.findOne({
             where: { userId },
-            include: [
-                {
-                    model: CartItem,
-                    include: [Product],
-                },
-            ],
+            include: [{ model: CartItem, include: [Product] }],
         });
 
         if (!cart || !cart.CartItems.length) {
-            return res.status(400).json({
-                message: "Cart is empty",
-            });
+            await transaction.rollback();
+            return res.status(400).json({ message: "Cart is empty" });
         }
-
-        /* -------------------- Stock & Total -------------------- */
 
         let totalAmount = 0;
-
         for (const item of cart.CartItems) {
-            const product = item.Product;
-
-            if (product.stock < item.quantity) {
-                return res.status(400).json({
-                    message: `Insufficient stock for ${product.name}`,
-                });
+            if (item.Product.stock < item.quantity) {
+                await transaction.rollback();
+                return res.status(400).json({ message: `Insufficient stock for ${item.Product.name}` });
             }
-
-            totalAmount += item.quantity * product.price;
+            totalAmount += item.quantity * item.Product.price;
         }
-
-        /* -------------------- Create Order -------------------- */
 
         const order = await Order.create(
             {
@@ -104,17 +71,15 @@ async function placeOrder(req, res) {
             { transaction }
         );
 
-        /* -------------------- Order Items & Stock Update -------------------- */
-
         for (const item of cart.CartItems) {
             const product = item.Product;
-
             await OrderItem.create(
                 {
                     orderId: order.id,
                     productId: product.id,
                     quantity: item.quantity,
                     price: product.price,
+                    status: "pending"
                 },
                 { transaction }
             );
@@ -122,8 +87,6 @@ async function placeOrder(req, res) {
             product.stock -= item.quantity;
             await product.save({ transaction });
         }
-
-        /* -------------------- Clear Cart -------------------- */
 
         await CartItem.destroy({
             where: { cartId: cart.id },
@@ -139,24 +102,24 @@ async function placeOrder(req, res) {
         });
     } catch (error) {
         await transaction.rollback();
-        console.error(error);
-
-        return res.status(500).json({
-            message: "Failed to place order",
-        });
+        if (next) next(error);
+        else res.status(500).json({ message: "Failed to place order" });
     }
 }
 
-
-
-async function getOrderById(req, res) {
+async function getOrderById(req, res, next) {
     try {
         const { id } = req.params;
         const userId = req.user.id;
 
         const order = await Order.findOne({
             where: { id, userId },
-            include: [OrderItem]
+            include: [
+                {
+                    model: OrderItem,
+                    as: "orderItems"
+                }
+            ]
         });
 
         if (!order) {
@@ -165,12 +128,58 @@ async function getOrderById(req, res) {
 
         return res.status(200).json(order);
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Server error" });
+        next(error);
     }
 }
 
-async function cancelOrder(req, res) {
+async function updateOrderItemStatus(req, res, next) {
+    try {
+        const { itemId } = req.params;
+        const { status } = req.body;
+
+        const allowed = ["pending", "shipped", "delivered", "returned"];
+        if (!allowed.includes(status)) {
+            return res.status(400).json({ message: "Invalid status value" });
+        }
+
+        const orderItem = await OrderItem.findByPk(itemId);
+        if (!orderItem) {
+            return res.status(404).json({ message: "Order Item not found" });
+        }
+
+        orderItem.status = status;
+        await orderItem.save();
+
+        const allItems = await OrderItem.findAll({ where: { orderId: orderItem.orderId } });
+
+        const allComplete = allItems.every(item =>
+            ["shipped", "delivered", "returned"].includes(item.status)
+        );
+
+        if (allComplete) {
+            let newStatus = "shipped";
+
+            if (status === "delivered") newStatus = "delivered";
+            if (status === "cancelled") newStatus = "cancelled";
+
+            await Order.update(
+                { status: newStatus },
+                { where: { id: orderItem.orderId } }
+            );
+            console.log(`Auto-updated Parent Order #${orderItem.orderId} to '${newStatus}'`);
+        }
+
+        return res.status(200).json({
+            message: "Item status updated",
+            orderItem
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function cancelOrder(req, res, next) {
     try {
         const { id } = req.params;
         const userId = req.user.id;
@@ -180,7 +189,6 @@ async function cancelOrder(req, res) {
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
-
         if (order.status !== "pending") {
             return res.status(400).json({ message: "Order cannot be cancelled" });
         }
@@ -188,30 +196,18 @@ async function cancelOrder(req, res) {
         order.status = "cancelled";
         await order.save();
 
-        return res.status(200).json({
-            message: "Order cancelled",
-            order
-        });
+        return res.status(200).json({ message: "Order cancelled", order });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Server error" });
+        next(error);
     }
 }
 
-
-async function updateOrderStatus(req, res) {
+async function updateOrderStatus(req, res, next) {
     try {
         const { id } = req.params;
         const { status } = req.body;
 
-        const allowed = ["pending", "shipped", "delivered", "cancelled"];
-
-        if (!allowed.includes(status)) {
-            return res.status(400).json({ message: "Invalid status value" });
-        }
-
         const order = await Order.findByPk(id);
-
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
@@ -219,14 +215,9 @@ async function updateOrderStatus(req, res) {
         order.status = status;
         await order.save();
 
-        return res.status(200).json({
-            message: "Order status updated",
-            order
-        });
-
+        return res.status(200).json({ message: "Order status updated", order });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Server error" });
+        next(error);
     }
 }
 
@@ -235,5 +226,6 @@ module.exports = {
     getOrderById,
     cancelOrder,
     getMyOrders,
-    updateOrderStatus
-}
+    updateOrderStatus,
+    updateOrderItemStatus
+};

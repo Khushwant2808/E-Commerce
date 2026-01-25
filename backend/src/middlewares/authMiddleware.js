@@ -2,16 +2,16 @@ const rateLimit = require("express-rate-limit");
 const jwt = require('jsonwebtoken');
 
 const limiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 1000000, //for testing
-  standardHeaders: true, 
-  legacyHeaders: false, 
+  windowMs: 10 * 60 * 1000,
+  max: 1000000,
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { message: "Too many requests, please try again after 15 minutes." }
 });
 
 const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 50000, //for testing 
+  windowMs: 60 * 60 * 1000,
+  max: 50000,
   message: { message: "Too many login attempts, please try again after an hour" }
 });
 
@@ -30,10 +30,10 @@ const authenticateToken = (req, res, next) => {
       }
       next();
   } catch (err) {
-    const errorMessage = err.name === "TokenExpiredError" 
-      ? "Your session has expired. Please log in again." 
+    const errorMessage = err.name === "TokenExpiredError"
+      ? "Your session has expired. Please log in again."
       : "Invalid token. Authentication failed.";
-      
+
     res.status(403).json({ message: errorMessage });
   }
 };

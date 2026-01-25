@@ -1,7 +1,7 @@
 const { Review, Order, OrderItem, Product } = require("../models");
 const { Sequelize } = require("sequelize");
 
-async function addReview(req, res) {
+async function addReview(req, res, next) {
   try {
     const userId = req.user.id;
     const { productId, rating, comment } = req.body;
@@ -47,12 +47,11 @@ async function addReview(req, res) {
     });
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    next(error);
   }
 }
 
-async function updateReview(req, res) {
+async function updateReview(req, res, next) {
   try {
     const userId = req.user.id;
     const { productId, rating, comment } = req.body;
@@ -86,12 +85,11 @@ async function updateReview(req, res) {
     });
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    next(error);
   }
 }
 
-async function getProductRating(req, res) {
+async function getProductRating(req, res, next) {
   try {
     const { productId } = req.params;
 
@@ -113,8 +111,7 @@ async function getProductRating(req, res) {
     });
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    next(error);
   }
 }
 

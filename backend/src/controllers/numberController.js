@@ -1,7 +1,7 @@
 const { PhoneNumber, User } = require("../models");
 const { Sequelize } = require("sequelize");
 
-async function addPhoneNumber(req, res) {
+async function addPhoneNumber(req, res, next) {
   try {
     const userId = req.user.id;
     const { phone } = req.body;
@@ -22,11 +22,6 @@ async function addPhoneNumber(req, res) {
       });
     }
 
-    await User.update(
-      { phoneNumberProvided: true },
-      { where: { id: userId } }
-    );
-
     if (process.env.LOG === "true") {
       console.log("Number upserted", "User ID", userId, phone);
     }
@@ -41,12 +36,11 @@ async function addPhoneNumber(req, res) {
       return res.status(409).json({ message: "Number already exists" });
     }
 
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    next(error);
   }
 }
 
-async function getPhoneNumber(req, res) {
+async function getPhoneNumber(req, res, next) {
   try {
     const userId = req.user.id;
 
@@ -61,12 +55,11 @@ async function getPhoneNumber(req, res) {
     return res.status(200).json(numbers);
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    next(error);
   }
 }
 
-async function updatePhoneNumber(req, res) {
+async function updatePhoneNumber(req, res, next) {
   try {
     const userId = req.user.id;
     const { phone } = req.body;
@@ -96,8 +89,7 @@ async function updatePhoneNumber(req, res) {
       return res.status(409).json({ message: "Number already exists" });
     }
 
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    next(error);
   }
 }
 

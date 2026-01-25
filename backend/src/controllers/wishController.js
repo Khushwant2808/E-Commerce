@@ -1,7 +1,7 @@
 const { Wishlist } = require("../models");
 const { Sequelize } = require("sequelize");
 
-async function addToWishList(req, res) {
+async function addToWishList(req, res, next) {
   try {
     const userId = req.user.id;
     const { productId } = req.body;
@@ -29,12 +29,11 @@ async function addToWishList(req, res) {
       return res.status(409).json({ message: "Item already in wishlist" });
     }
 
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    next(error);
   }
 }
 
-async function getWishlist(req, res) {
+async function getWishlist(req, res, next) {
   try {
     const userId = req.user.id;
 
@@ -49,8 +48,7 @@ async function getWishlist(req, res) {
     return res.status(200).json(wishlist);
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    next(error);
   }
 }
 

@@ -1,32 +1,25 @@
- const { DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
 const OrderItem = sequelize.define(
   "OrderItem",
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    orderId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    productId: { 
-        type: DataTypes.INTEGER,
-        allowNull:false
-    },
-    quantity: {
-        type: DataTypes.INTEGER,
-        allowNull:false
+    orderId: { type: DataTypes.INTEGER, allowNull: false },
+    productId: { type: DataTypes.INTEGER, allowNull: false },
+    quantity: { type: DataTypes.INTEGER, allowNull: false },
+    price: { type: DataTypes.DECIMAL(10, 2), allowNull: false }, // Store price at time of purchase
+    status: {
+      type: DataTypes.ENUM("pending", "shipped", "delivered", "cancelled", "returned"),
+      defaultValue: "pending"
     }
   },
   {
     tableName: "order_items",
     timestamps: true,
-    indexes: [
-      { unique: true, fields: ["orderId", "productId"] }
-    ]
+    paranoid: true, // Soft Delete (Item 7)
+    indexes: [{ unique: true, fields: ["orderId", "productId"] }]
   }
-  
-  
 );
 
 module.exports = OrderItem;

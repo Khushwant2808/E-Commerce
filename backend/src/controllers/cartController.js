@@ -1,8 +1,6 @@
 const { Cart, CartItem, Product } = require("../models");
 const { Sequelize } = require("sequelize");
 
-/* -------------------- Helpers -------------------- */
-
 async function getOrCreateCart(userId) {
     const [cart] = await Cart.findOrCreate({
         where: { userId },
@@ -16,14 +14,11 @@ async function getOrCreateCart(userId) {
     return cart;
 }
 
-/* -------------------- Controllers -------------------- */
-
-async function updateItemInCart(req, res) {
+async function updateItemInCart(req, res, next) {
     try {
         const { productId, quantity } = req.body;
         const userId = req.user.id;
 
-        // Validation
         if (!productId) {
             return res.status(400).json({ message: "Product ID is required" });
         }
@@ -32,7 +27,6 @@ async function updateItemInCart(req, res) {
             return res.status(400).json({ message: "Quantity must be a number" });
         }
 
-        // Product check
         const product = await Product.findByPk(productId);
         if (!product) {
             return res.status(404).json({ message: "Product not found" });
@@ -44,7 +38,6 @@ async function updateItemInCart(req, res) {
             });
         }
 
-        // Cart handling
         const cart = await getOrCreateCart(userId);
 
         const [cartItem, created] = await CartItem.findOrCreate({
@@ -52,7 +45,6 @@ async function updateItemInCart(req, res) {
             defaults: { quantity },
         });
 
-        // Update existing item
         if (!created) {
             cartItem.quantity += quantity;
 
@@ -73,9 +65,7 @@ async function updateItemInCart(req, res) {
             }
 
             await cartItem.save();
-        }
-        // Created but invalid quantity
-        else if (quantity <= 0) {
+        } else if (quantity <= 0) {
             await cartItem.destroy();
             return res.status(200).json({
                 message: "Item not added to cart with non-positive quantity",
@@ -97,12 +87,11 @@ async function updateItemInCart(req, res) {
                 .json({ message: "Item already exists in cart" });
         }
 
-        console.error(error);
-        return res.status(500).json({ message: "Server error" });
+        next(error);
     }
 }
 
-async function getCartItems(req, res) {
+async function getCartItems(req, res, next) {
     try {
         const userId = req.user.id;
 
@@ -124,12 +113,9 @@ async function getCartItems(req, res) {
 
         return res.status(200).json(cartItems);
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Server error" });
+        next(error);
     }
 }
-
-/* -------------------- Exports -------------------- */
 
 module.exports = {
     updateItemInCart,

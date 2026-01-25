@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { limiter, authLimiter } = require("./middlewares/authMiddleware");
+const errorHandler = require("./middlewares/errorMiddleware");
 const app = express();
 
 app.use(cors());
@@ -19,5 +20,5 @@ app.use("/api/review", require("./routes/reviewRoutes"))
 app.get("/", (req, res) => {
   res.send("E-commerce API is running");
 });
-
+app.use(errorHandler);
 module.exports = app;

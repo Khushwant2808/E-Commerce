@@ -1,6 +1,6 @@
-const { Address, User} = require("../models");
+const { Address, User } = require("../models");
 
-async function addAddress(req, res) {
+async function addAddress(req, res, next) {
   try {
     const userId = req.user.id;
     const { line1, line2, city, state, pincode, country, isDefault } = req.body;
@@ -26,10 +26,6 @@ async function addAddress(req, res) {
       country,
       isDefault: !!isDefault
     });
-    await User.update(
-        { addressProvided: true },
-        { where: { id: userId }}
-    )
 
     if (process.env.LOG !== "false") {
       console.log("Address added", userId);
@@ -41,12 +37,11 @@ async function addAddress(req, res) {
     });
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    next(error);
   }
 }
 
-async function getAddresses(req, res) {
+async function getAddresses(req, res, next) {
   try {
     const userId = req.user.id;
 
@@ -66,12 +61,11 @@ async function getAddresses(req, res) {
     return res.status(200).json(addresses);
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    next(error);
   }
 }
 
-async function updateAddress(req, res) {
+async function updateAddress(req, res, next) {
   try {
     const userId = req.user.id;
     const { id, line1, line2, city, state, pincode, country, isDefault } = req.body;
@@ -111,8 +105,7 @@ async function updateAddress(req, res) {
     });
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    next(error);
   }
 }
 

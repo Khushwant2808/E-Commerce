@@ -32,9 +32,6 @@ const User = sequelize.define(
       defaultValue: "user",
     },
 
-    phoneNumberProvided:{ type:  DataTypes.BOOLEAN, defaultValue: false},
-    addressProvided:{ type:  DataTypes.BOOLEAN, defaultValue: false},
-
     canSell: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
