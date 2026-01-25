@@ -54,6 +54,9 @@ Product.belongsTo(User, { foreignKey: "userId" });
 User.hasMany(Wishlist, { foreignKey: "userId", onDelete:"CASCADE" });
 Wishlist.belongsTo(User, { foreignKey: "userId" });
 
+User.hasMany(Address, { foreignKey: "userId", onDelete: "CASCADE" })
+Address.belongsTo(User, { foreignKey: "userId" } )
+
 module.exports = {
   sequelize,
   User,

@@ -12,6 +12,7 @@ app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/auth",authLimiter, require("./routes/authRoutes"));
 app.use("/api/wish", require("./routes/wishRoutes"));
 app.use("/api/number", require("./routes/numberRoutes"))
+app.use("/api/address", require("./routes/addressRoutes"))
 
 app.get("/", (req, res) => {
   res.send("E-commerce API is running");
