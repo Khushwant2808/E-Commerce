@@ -66,7 +66,6 @@ async function placeOrder(req, res, next) {
                 totalAmount,
                 addressId: address.id,
                 status: "pending",
-                paymentStatus: "pending",
             },
             { transaction }
         );
