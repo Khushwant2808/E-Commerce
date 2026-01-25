@@ -20,7 +20,19 @@ async function getPaymentsByOrderId(req, res, next) {
     }
 }
 
-async function createPayment(req , res , next) {
-    
-}
+// async function createPayment(req , res , next) {
+//     const t = await sequelize.transaction();
+//     try {
+//         const { orderId, gateway, amount, status, transactionId, rawResponse } =  req.body;
 
+//         const order = await Order.findByPk(orderId);
+//         if (!order) {
+//             await t.rollback();
+//             return res.status(404).json({ message: "Order not found" });
+//         }
+// }
+
+modeule.exports = {
+    getPaymentsByOrderId,
+    // createPayment
+};
