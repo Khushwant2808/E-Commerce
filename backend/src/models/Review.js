@@ -14,8 +14,8 @@ const Review = sequelize.define("Review", {
     tableName: "reviews",
     timestamps: true,
     indexes: [
-      { unique: true, fields: ["userId", "productId"] } // one review per user per product
+      { unique: true, fields: ["userId", "productId"] }
     ]
   });
-  
-module.exports = Review
+
+module.exports = Review;

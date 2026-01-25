@@ -11,13 +11,12 @@ const Cart = sequelize.define("Cart", {
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    unique: true, // 🚀 enforces ONE cart per user
+    unique: true,
   },
 }, {
   tableName: "carts",
   timestamps: true,
   paranoid: true
 });
-
 
 module.exports = Cart;

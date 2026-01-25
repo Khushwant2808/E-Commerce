@@ -1,4 +1,3 @@
-// models/Payment.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
@@ -12,7 +11,7 @@ const Payment = sequelize.define("Payment", {
   amount: { type: DataTypes.DECIMAL(10,2), allowNull: false },
 
   status: {
-    type: DataTypes.ENUM("created","success","failed","refunded"),
+    type: DataTypes.ENUM("created", "success", "failed", "refunded"),
     defaultValue: "created"
   },
 

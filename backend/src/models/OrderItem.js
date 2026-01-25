@@ -8,7 +8,7 @@ const OrderItem = sequelize.define(
     orderId: { type: DataTypes.INTEGER, allowNull: false },
     productId: { type: DataTypes.INTEGER, allowNull: false },
     quantity: { type: DataTypes.INTEGER, allowNull: false },
-    price: { type: DataTypes.DECIMAL(10, 2), allowNull: false }, // Store price at time of purchase
+    price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
     status: {
       type: DataTypes.ENUM("pending", "shipped", "delivered", "cancelled", "returned"),
       defaultValue: "pending"
@@ -17,7 +17,7 @@ const OrderItem = sequelize.define(
   {
     tableName: "order_items",
     timestamps: true,
-    paranoid: true, // Soft Delete (Item 7)
+    paranoid: true,
     indexes: [{ unique: true, fields: ["orderId", "productId"] }]
   }
 );
