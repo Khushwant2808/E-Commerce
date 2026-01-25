@@ -1,4 +1,4 @@
-const Product = require("../models/Product");
+const {Product} = require("../models");
 
 async function addProduct(req, res) {
     try {
@@ -48,18 +48,27 @@ async function getProducts(req, res) {
     }
 }
 
-async function getProductById(req, res) {
-    try {
-        const { id } = req.params;
-        if (!id || isNaN(id)) {
-            return res.status(400).json({ message: "Invalid product ID" });
-        }
+async function updateStock(req, res) {
+    try{
+        const {id, stock} = req.body;
         const product = await Product.findByPk(id);
-        if (!product) {
-            return res.status(404).json({ message: "Product not found" });
+        if(!product){
+            return res.status(404).json({message: "Product not found or stock not provided"});
         }
-        return res.status(200).json(product);
-    } catch (error) {
+        if(typeof stock !== "number" || stock <=0){
+            return res.status(400).json({message: "Stock must be a positive number"});
+        }
+        product.stock += stock;
+        await product.save();
+        if(process.env.LOG !== "false"){
+            console.log("Stock Updated");
+        }
+        return res.status(200).json({
+            message: "Stock updated successfully",
+            product
+        });
+    }
+    catch(error){
         console.error(error);
         res.status(500).json({ message: "Server error" });
     }
@@ -68,5 +77,5 @@ async function getProductById(req, res) {
 module.exports = {
     addProduct,
     getProducts,
-    getProductById
+    updateStock
 };  
