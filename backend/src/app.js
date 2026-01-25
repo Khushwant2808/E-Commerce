@@ -14,6 +14,7 @@ app.use("/api/wish", require("./routes/wishRoutes"));
 app.use("/api/number", require("./routes/numberRoutes"))
 app.use("/api/address", require("./routes/addressRoutes"))
 app.use("/api/orders", require("./routes/orderRoutes"))
+app.use("/api/review", require("./routes/reviewRoutes"))
 
 app.get("/", (req, res) => {
   res.send("E-commerce API is running");
