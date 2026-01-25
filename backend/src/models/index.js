@@ -4,7 +4,7 @@ const User = require("./User");
 const Product = require("./Product");
 const Cart = require("./Cart");
 const CartItem = require("./CartItems");
-const PhoneNumber = require("./Number");
+const PhoneNumber = require("./PhoneNumber");
 const Address = require("./Address");
 const Order = require("./Order");
 const OrderItem = require("./OrderItem");
@@ -21,7 +21,7 @@ Address.belongsTo(User, { foreignKey: "userId" });
 User.hasMany(Order, { foreignKey: "userId", onDelete: "CASCADE" });
 Order.belongsTo(User, { foreignKey: "userId" });
 
-Order.hasMany(OrderItem, { foreignKey: "orderId", onDelete: "CASCADE" });
+Order.hasMany(OrderItem, { as: "orderItems", foreignKey: "orderId", onDelete: "CASCADE" });
 OrderItem.belongsTo(Order, { foreignKey: "orderId" });
 
 Product.hasMany(OrderItem, { foreignKey: "productId", onDelete: "CASCADE" });
