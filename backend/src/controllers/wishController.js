@@ -23,7 +23,6 @@ async function addToWishList(req, res, next) {
       message: "Item added to wishlist successfully",
       wish
     });
-
   } catch (error) {
     if (error instanceof Sequelize.UniqueConstraintError) {
       return res.status(409).json({ message: "Item already in wishlist" });
@@ -46,7 +45,6 @@ async function getWishlist(req, res, next) {
     }
 
     return res.status(200).json(wishlist);
-
   } catch (error) {
     next(error);
   }

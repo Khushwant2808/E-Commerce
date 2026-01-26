@@ -1,5 +1,5 @@
 const rateLimit = require("express-rate-limit");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const limiter = rateLimit({
   windowMs: 10 * 60 * 1000,
@@ -16,19 +16,20 @@ const authLimiter = rateLimit({
 });
 
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-      return res.status(401).json({ message: "Access Denied: No Token Provided!" });
+    return res.status(401).json({ message: "Access Denied: No Token Provided!" });
   }
+
   try {
-      const verified = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = verified;
-      if (process.env.LOG !== "false"){
-        console.log("User Verified", req.user.id)
-      }
-      next();
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = verified;
+    if (process.env.LOG !== "false") {
+      console.log("User Verified", req.user.id);
+    }
+    next();
   } catch (err) {
     const errorMessage = err.name === "TokenExpiredError"
       ? "Your session has expired. Please log in again."

@@ -15,9 +15,8 @@ const Wishlist = sequelize.define("Wishlist", {
 
   productId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: false
   }
-
 }, {
   tableName: "wishlists",
   timestamps: true,

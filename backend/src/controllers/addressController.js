@@ -1,13 +1,22 @@
 const { Address, User } = require("../models");
 
+const sanitize = (str) => {
+  if (typeof str !== "string") return str;
+  return str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+};
+
 async function addAddress(req, res, next) {
   try {
     const userId = req.user.id;
-    const { line1, line2, city, state, pincode, country, isDefault } = req.body;
+    let { line1, line2, city, state, pincode, country, isDefault } = req.body;
 
     if (!line1 || !city || !state || !pincode) {
       return res.status(400).json({ message: "Missing required fields" });
     }
+    line1 = sanitize(line1);
+    line2 = sanitize(line2);
+    city = sanitize(city);
+    state = sanitize(state);
 
     if (isDefault === true) {
       await Address.update(
@@ -35,7 +44,6 @@ async function addAddress(req, res, next) {
       message: "Address added successfully",
       address
     });
-
   } catch (error) {
     next(error);
   }
@@ -59,7 +67,6 @@ async function getAddresses(req, res, next) {
     }
 
     return res.status(200).json(addresses);
-
   } catch (error) {
     next(error);
   }
@@ -103,7 +110,6 @@ async function updateAddress(req, res, next) {
       message: "Address updated successfully",
       address
     });
-
   } catch (error) {
     next(error);
   }

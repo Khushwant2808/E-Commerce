@@ -9,6 +9,9 @@ async function addReview(req, res, next) {
     if (!productId || !rating) {
       return res.status(400).json({ message: "Product and rating required" });
     }
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Rating must be between 1 and 5" });
+    }
 
     const orderItem = await OrderItem.findOne({
       include: [{
@@ -45,7 +48,6 @@ async function addReview(req, res, next) {
       message: "Review added",
       review
     });
-
   } catch (error) {
     next(error);
   }
@@ -67,6 +69,9 @@ async function updateReview(req, res, next) {
     if (!review) {
       return res.status(404).json({ message: "Review not found" });
     }
+    if (rating !== undefined && (rating < 1 || rating > 5)) {
+      return res.status(400).json({ message: "Rating must be between 1 and 5" });
+    }
 
     if (rating !== undefined) review.rating = rating;
     if (comment !== undefined) review.comment = comment;
@@ -83,7 +88,6 @@ async function updateReview(req, res, next) {
       message: "Review updated",
       review
     });
-
   } catch (error) {
     next(error);
   }
@@ -109,7 +113,6 @@ async function getProductRating(req, res, next) {
       rating: product.rating,
       ratingCount: product.ratingCount
     });
-
   } catch (error) {
     next(error);
   }

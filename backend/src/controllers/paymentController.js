@@ -1,144 +1,115 @@
-<<<<<<< HEAD
 const { Order, Payment, sequelize } = require("../models");
 
-// 1. Initialize (or Retry) Payment
 async function initializePayment(req, res, next) {
-    try {
-        const { orderId, method } = req.body; // method: 'online' or 'cod'
-        const userId = req.user.id;
+  try {
+    const { orderId, method } = req.body;
+    const userId = req.user.id;
+    const validMethods = ["cod", "online"];
 
-        const order = await Order.findOne({ where: { id: orderId, userId } });
-        if (!order) return res.status(404).json({ message: "Order not found" });
-
-        if (order.paymentStatus === "paid") {
-            return res.status(400).json({ message: "Order is already paid" });
-        }
-
-        // SCENARIO: COD
-        if (method === "cod") {
-            await Payment.create({
-                orderId: order.id,
-                amount: order.totalAmount,
-                method: "cod",
-                status: "pending",
-                transactionId: `COD-${Date.now()}`
-            });
-            return res.status(200).json({ message: "Order set to COD", order });
-        }
-
-        // SCENARIO: ONLINE
-        const payment = await Payment.create({
-            orderId: order.id,
-            amount: order.totalAmount,
-            method: "online",
-            status: "pending",
-            gateway: "stripe_mock" 
-        });
-
-        // Simulate Session ID (Replace with real Stripe Logic)
-        const sessionId = `sess_${Date.now()}_${payment.id}`;
-        payment.transactionId = sessionId;
-        await payment.save();
-
-        return res.status(200).json({
-            message: "Payment initialized",
-            paymentId: payment.id,
-            sessionId: sessionId
-        });
-
-    } catch (error) {
-        next(error);
+    if (!validMethods.includes(method)) {
+      return res.status(400).json({ message: "Invalid payment method. Use 'cod' or 'online'." });
     }
+
+    const order = await Order.findOne({ where: { id: orderId, userId } });
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    if (order.paymentStatus === "paid") {
+      return res.status(400).json({ message: "Order is already paid" });
+    }
+
+    if (method === "cod") {
+      await Payment.create({
+        orderId: order.id,
+        amount: order.totalAmount,
+        method: "cod",
+        status: "pending",
+        transactionId: `COD-${Date.now()}`
+      });
+      return res.status(200).json({ message: "Order set to COD", order });
+    }
+
+    const payment = await Payment.create({
+      orderId: order.id,
+      amount: order.totalAmount,
+      method: "online",
+      status: "pending",
+      gateway: "stripe_mock"
+    });
+
+    const sessionId = `sess_${Date.now()}_${payment.id}`;
+    payment.transactionId = sessionId;
+    await payment.save();
+
+    return res.status(200).json({
+      message: "Payment initialized",
+      paymentId: payment.id,
+      sessionId: sessionId
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
-// 2. Verify Payment (Webhook/Success Page)
 async function verifyPayment(req, res, next) {
-    const transaction = await sequelize.transaction();
-    try {
-        const { paymentId, status } = req.body; // 'success' or 'failed'
-        
-        const payment = await Payment.findByPk(paymentId);
-        if (!payment) {
-            await transaction.rollback();
-            return res.status(404).json({ message: "Payment not found" });
-        }
+  const transaction = await sequelize.transaction();
+  try {
+    const { paymentId, status } = req.body;
 
-        payment.status = status;
-        await payment.save({ transaction });
-
-        const order = await Order.findByPk(payment.orderId);
-
-        if (status === "success") {
-            order.paymentStatus = "paid";
-            await order.save({ transaction });
-        } else if (status === "failed") {
-            order.paymentStatus = "failed"; // Marks order as failed (allows retry)
-            await order.save({ transaction });
-        }
-
-        await transaction.commit();
-        return res.status(200).json({ 
-            message: `Payment updated to ${status}`, 
-            orderPaymentStatus: order.paymentStatus 
-        });
-
-    } catch (error) {
-        await transaction.rollback();
-        next(error);
+    const payment = await Payment.findByPk(paymentId);
+    if (!payment) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Payment not found" });
     }
+
+    payment.status = status;
+    await payment.save({ transaction });
+
+    const order = await Order.findByPk(payment.orderId);
+
+    if (status === "success") {
+      order.paymentStatus = "paid";
+      await order.save({ transaction });
+    } else if (status === "failed") {
+      order.paymentStatus = "failed";
+      await order.save({ transaction });
+    }
+
+    await transaction.commit();
+    return res.status(200).json({
+      message: `Payment updated to ${status}`,
+      orderPaymentStatus: order.paymentStatus
+    });
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
+  }
 }
 
 async function getOrderHistory(req, res, next) {
-    try {
-        const { orderId } = req.params;
-        const payments = await Payment.findAll({ 
-            where: { orderId },
-            order: [["createdAt", "DESC"]]
-        });
-        return res.status(200).json(payments);
-    } catch(err) {
-        next(err);
+  try {
+    const { orderId } = req.params;
+    const userId = req.user.id;
+    const order = await Order.findOne({
+      where: { id: orderId, userId }
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found or unauthorized" });
     }
+
+    const payments = await Payment.findAll({
+      where: { orderId },
+      order: [["createdAt", "DESC"]]
+    });
+
+    return res.status(200).json(payments);
+  } catch (err) {
+    next(err);
+  }
 }
 
-module.exports = { initializePayment, verifyPayment, getOrderHistory };
-=======
-const {Payment , Order} = require('../models');
-const sequelize = require("sequelize");
-
-async function getPaymentsByOrderId(req, res, next) {
-    try {
-        const orderId = req.body.orderId;
-
-        const payments = await Payment.findAll({
-            where: { orderId },
-            order: [["createdAt", "DESC"]],
-        });
-
-        if (!payments.length) {
-            return res.status(404).json({ message: "No payments found for this order" });
-        }
-
-        return res.status(200).json(payments);
-    } catch (error) {
-        next(error);
-    }
-}
-
-// async function createPayment(req , res , next) {
-//     const t = await sequelize.transaction();
-//     try {
-//         const { orderId, gateway, amount, status, transactionId, rawResponse } =  req.body;
-
-//         const order = await Order.findByPk(orderId);
-//         if (!order) {
-//             await t.rollback();
-//             return res.status(404).json({ message: "Order not found" });
-//         }
-// }
-
-modeule.exports = {
-    getPaymentsByOrderId,
-    // createPayment
+module.exports = {
+  initializePayment,
+  verifyPayment,
+  getOrderHistory
 };
->>>>>>> main

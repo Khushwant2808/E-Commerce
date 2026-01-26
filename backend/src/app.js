@@ -2,24 +2,27 @@ const express = require("express");
 const cors = require("cors");
 const { limiter, authLimiter } = require("./middlewares/authMiddleware");
 const errorHandler = require("./middlewares/errorMiddleware");
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(limiter)
+app.use(limiter);
 
 app.use("/api/cart", require("./routes/cartRotutes"));
 app.use("/api/products", require("./routes/productRoutes"));
-app.use("/api/auth",authLimiter, require("./routes/authRoutes"));
+app.use("/api/auth", authLimiter, require("./routes/authRoutes"));
 app.use("/api/wish", require("./routes/wishRoutes"));
-app.use("/api/number", require("./routes/numberRoutes"))
-app.use("/api/address", require("./routes/addressRoutes"))
-app.use("/api/orders", require("./routes/orderRoutes"))
-app.use("/api/review", require("./routes/reviewRoutes"))
+app.use("/api/number", require("./routes/numberRoutes"));
+app.use("/api/address", require("./routes/addressRoutes"));
+app.use("/api/orders", require("./routes/orderRoutes"));
+app.use("/api/review", require("./routes/reviewRoutes"));
 app.use("/api/payments", require("./routes/paymentRoutes"));
 
 app.get("/", (req, res) => {
   res.send("E-commerce API is running");
 });
+
 app.use(errorHandler);
+
 module.exports = app;

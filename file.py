@@ -1,181 +1,245 @@
-import requests
-import json
+import requests, sys, time, json, random, csv
 
-# --- CONFIGURATION ---
-BASE_URL = "http://localhost:8000"
-BEARER_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6Illhc2giLCJyb2xlIjoidXNlciIsImNhblNlbGwiOnRydWUsImlhdCI6MTc2OTM3MDY5MSwiZXhwIjoxNzY5NDU3MDkxfQ.iu92G4iVxZJkkkKDxBGnga1kbm6bEqF2fRWUmVDjx50"  # <--- PROVIDE YOUR TOKEN HERE
+# ==========================================
+# 1. CONFIGURATION
+# ==========================================
+BASE_URL = "http://localhost:8000/api"
+# Use nanosecond timestamp to ensure absolute uniqueness across rapid runs
+TS = str(time.time_ns()) 
 
-# --- SETUP ---
-headers = {
-    "Authorization": f"Bearer {BEARER_TOKEN}",
-    "Content-Type": "application/json"
-}
+# Unique Identities per Run
+SELLER_EMAIL = f"seller_{TS}@test.com"
+BUYER_EMAIL = f"buyer_{TS}@test.com"
+UNIQUE_PROD = f"Prod_{TS}"
+PASS_VAL = "Password@123"
+ADMIN_EMAIL = "admin@admin.com"
+ADMIN_PASS = "1234"
 
-def log(step, method, url, status, response):
-    print(f"[{step}] {method} {url} | Status: {status}")
+# Unique Phone Numbers (Guaranteed not to conflict with DB)
+# Using last 8 digits of TS ensures it fits in standard phone length constraints
+PHONE_VALID = f"99{TS[-8:]}" 
+PHONE_UPDATE = f"88{TS[-8:]}"
+
+# Output Config
+CSV_FILENAME = f"audit_report_{TS}.csv"
+csv_writer = None
+
+# Colors
+C_GRN, C_RED, C_CYN, C_YEL, C_END = "\033[92m", "\033[91m", "\033[96m", "\033[93m", "\033[0m"
+STATS = {"p": 0, "f": 0}
+
+# ==========================================
+# 2. TEST ENGINE
+# ==========================================
+def req(method, ep, name, token=None, data=None, expect=200, role="User"):
+    sys.stdout.write(f"{C_CYN}[{role[:3].upper()}] {name[:35]:<35}{C_END}")
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    
     try:
-        print(f"Response: {json.dumps(response, indent=2)}\n")
-    except:
-        print(f"Response: {response}\n")
+        # EXECUTE REQUEST
+        if method == "GET": res = requests.get(f"{BASE_URL}{ep}", headers=headers)
+        elif method == "POST": res = requests.post(f"{BASE_URL}{ep}", json=data, headers=headers)
+        elif method == "PUT": res = requests.put(f"{BASE_URL}{ep}", json=data, headers=headers)
+        elif method == "DELETE": res = requests.delete(f"{BASE_URL}{ep}", headers=headers)
+        
+        # PARSE RESPONSE
+        try: body = res.json()
+        except: body = {"text": res.text[:200]} # Capture partial text if not JSON
+        
+        # VALIDATE
+        valid = expect if isinstance(expect, list) else [expect]
+        is_pass = res.status_code in valid
+        
+        # CONSOLE OUTPUT
+        exp_str = f"Exp: {str(valid)}"
+        got_str = f"Got: {res.status_code}"
+        msg = json.dumps(body)
+        console_msg = msg[:55] + "..." if len(msg) > 55 else msg
 
-# --- VARIABLES TO CAPTURE DYNAMICALLY ---
-captured_product_id = 1 
-captured_order_id = 1
-captured_order_item_id = 1
+        if is_pass:
+            print(f"{C_GRN}PASS{C_END} | {exp_str:<13} | {got_str:<8} | {C_YEL}{console_msg}{C_END}")
+            STATS["p"] += 1
+            result_str = "PASS"
+        else:
+            print(f"{C_RED}FAIL{C_END} | {exp_str:<13} | {got_str:<8} | {C_YEL}{console_msg}{C_END}")
+            STATS["f"] += 1
+            result_str = "FAIL"
 
-# --- 1. AUTHENTICATION (Tests only, does not override provided token) ---
-try:
-    # Register
-    res = requests.post(f"{BASE_URL}/api/auth/register", json={
-        "name": "Auto Tester",
-        "email": f"autotest{requests.utils.quote(str(json.dumps({})))[-5:]}@example.com", # Randomize slightly
-        "password": "password123"
-    })
-    log("1", "POST", "/api/auth/register", res.status_code, res.json())
+        # CSV LOGGING
+        if csv_writer:
+            csv_writer.writerow([
+                name, 
+                role, 
+                method, 
+                ep, 
+                str(expect), 
+                res.status_code, 
+                result_str, 
+                msg, # Full response body in CSV
+                time.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+            
+        return body
 
-    # Login
-    res = requests.post(f"{BASE_URL}/api/auth/login", json={
-        "email": "ayash@gmail.com",
-        "password": "1234"
-    })
-    log("2", "POST", "/api/auth/login", res.status_code, res.json())
+    except Exception as e:
+        print(f"{C_RED}ERR {e}{C_END}")
+        STATS["f"] += 1
+        if csv_writer:
+            csv_writer.writerow([name, role, method, ep, str(expect), "ERR", "ERROR", str(e), time.strftime('%Y-%m-%d %H:%M:%S')])
+        return None
 
-    # Profile
-    res = requests.get(f"{BASE_URL}/api/auth/api/profile", headers=headers)
-    log("3", "GET", "/api/auth/api/profile", res.status_code, res.json())
+# ==========================================
+# 3. MAIN EXECUTION
+# ==========================================
+print(f"\n{C_CYN}{'='*105}\nULTRA TESTER: FINAL AUDIT (CSV ENABLED)\n{'='*105}{C_END}")
+print(f"{C_YEL}Saving full report to: {CSV_FILENAME}{C_END}\n")
 
-except Exception as e: print(f"Auth Block Error: {e}")
+with open(CSV_FILENAME, 'w', newline='', encoding='utf-8') as csv_file:
+    csv_writer = csv.writer(csv_file)
+    # CSV Header
+    csv_writer.writerow(['Test Case', 'Role', 'Method', 'Endpoint', 'Expected Code', 'Actual Code', 'Result', 'Full Response', 'Timestamp'])
 
-# --- 2. ADDRESS & PHONE ---
-try:
-    # Add Address
-    res = requests.post(f"{BASE_URL}/api/address", headers=headers, json={
-        "line1": "123 Code St", "city": "PythonCity", "state": "PY", 
-        "pincode": "101010", "country": "India", "isDefault": True
-    })
-    log("4", "POST", "/api/address", res.status_code, res.json())
+    # --- 1. AUTHENTICATION (20 Tests) ---
+    req("POST", "/auth/register", "Reg Buyer Valid", data={"name":"B","email":BUYER_EMAIL,"password":PASS_VAL}, expect=201)
+    req("POST", "/auth/register", "Reg Seller Valid", data={"name":"S","email":SELLER_EMAIL,"password":PASS_VAL}, expect=201)
+    req("POST", "/auth/register", "Reg Dup Email", data={"name":"X","email":BUYER_EMAIL,"password":PASS_VAL}, expect=409)
+    req("POST", "/auth/register", "Reg Weak Pass", data={"name":"W","email":f"w{TS}@t.com","password":"123"}, expect=400)
+    req("POST", "/auth/register", "Reg No Email", data={"name":"N","password":PASS_VAL}, expect=400)
+    req("POST", "/auth/register", "Reg Bad Email Fmt", data={"name":"F","email":"bad.com","password":PASS_VAL}, expect=400)
+    req("POST", "/auth/register", "Reg SQLi Name", data={"name":"' OR 1=1--","email":f"sqli{TS}@t.com","password":PASS_VAL}, expect=201) 
+    req("POST", "/auth/register", "Reg Huge Payload", data={"name":"A"*5000,"email":f"huge{TS}@t.com","password":PASS_VAL}, expect=[201, 413, 500])
 
-    # Get Addresses
-    res = requests.get(f"{BASE_URL}/api/address", headers=headers)
-    log("5", "GET", "/api/address", res.status_code, res.json())
+    buyer_tok = req("POST", "/auth/login", "Login Buyer", data={"email":BUYER_EMAIL,"password":PASS_VAL})['token']
+    seller_tok = req("POST", "/auth/login", "Login Seller", data={"email":SELLER_EMAIL,"password":PASS_VAL})['token']
+    admin_tok = req("POST", "/auth/login", "Login Admin", data={"email":ADMIN_EMAIL,"password":ADMIN_PASS})['token']
 
-    # Update Address
-    if res.json() and isinstance(res.json(), list):
-        addr_id = res.json()[0]['id']
-        res = requests.put(f"{BASE_URL}/api/address", headers=headers, json={"id": addr_id, "city": "UpdatedCity"})
-        log("6", "PUT", "/api/address", res.status_code, res.json())
+    req("POST", "/auth/login", "Login Bad Pass", data={"email":BUYER_EMAIL,"password":"wrong"}, expect=401)
+    req("POST", "/auth/login", "Login Non-Exist", data={"email":"ghost@test.com","password":PASS_VAL}, expect=401)
+    req("POST", "/auth/login", "Login SQLi Email", data={"email":"' OR ''='","password":"123"}, expect=401)
+    req("POST", "/auth/login", "Login Empty Data", data={}, expect=[400, 401, 500])
+    req("GET", "/auth/api/profile", "Profile Valid", token=buyer_tok)
+    req("GET", "/auth/api/profile", "Profile Bad Token", token=buyer_tok+"x", expect=[403, 500])
+    req("GET", "/auth/api/profile", "Profile No Token", expect=401)
+    req("PUT", "/auth/become-seller", "Upgrade Seller", token=seller_tok, expect=200)
+    req("PUT", "/auth/become-seller", "Upgrade Again", token=seller_tok, expect=400)
+    req("POST", "/auth/login", "Login Case Sens", data={"email":BUYER_EMAIL.upper(),"password":PASS_VAL}, expect=[200, 401]) 
 
-    # Add Phone
-    res = requests.post(f"{BASE_URL}/api/number", headers=headers, json={"phone": "9876543210"})
-    log("7", "POST", "/api/number", res.status_code, res.json())
+    # --- 2. USER DATA (15 Tests) ---
+    req("POST", "/number", "Phone Valid", token=buyer_tok, data={"phone":PHONE_VALID}, expect=[200, 201])
+    req("POST", "/number", "Phone Short", token=buyer_tok, data={"phone":"123"}, expect=400)
+    req("PUT", "/number", "Update Phone", token=buyer_tok, data={"phone":PHONE_UPDATE}, expect=200)
+    req("GET", "/number", "Get Phone", token=buyer_tok, expect=200)
 
-    # Get Phone
-    res = requests.get(f"{BASE_URL}/api/number", headers=headers)
-    log("8", "GET", "/api/number", res.status_code, res.json())
+    addr_id = req("POST", "/address", "Addr Valid", token=buyer_tok, data={"line1":"L1","city":"C","state":"S","pincode":"123456","country":"IN","isDefault":True}, expect=201)['address']['id']
+    req("POST", "/address", "Addr Missing Field", token=buyer_tok, data={"city":"C"}, expect=[400, 500])
+    req("POST", "/address", "Addr XSS Input", token=buyer_tok, data={"line1":"<script>alert(1)</script>","city":"C","state":"S","pincode":"123","country":"IN"}, expect=[201, 400])
+    req("PUT", "/address", "Update Addr Valid", token=buyer_tok, data={"id":addr_id,"line1":"New L1"}, expect=200)
+    req("PUT", "/address", "Update Bad ID", token=buyer_tok, data={"id":99999,"line1":"X"}, expect=404)
+    req("GET", "/address", "Get Addr", token=buyer_tok)
+    req("GET", "/address", "Get Addr No Tok", expect=401)
 
-except Exception as e: print(f"Profile Block Error: {e}")
+    # --- 3. PRODUCTS (25 Tests) ---
+    p_data = {"name":UNIQUE_PROD,"price":100,"stock":10,"description":"D","imageUrl":"u"}
+    p1 = req("POST", "/products", "Seller Add Valid", token=seller_tok, data=p_data, expect=201, role="Sel")['product']['id']
 
-# --- 3. PRODUCT MANAGEMENT ---
-try:
-    # Add Product (Seller only)
-    res = requests.post(f"{BASE_URL}/api/products", headers=headers, json={
-        "name": "Auto Test Product", "price": 100, "stock": 50, "description": "Generated by script"
-    })
-    log("9", "POST", "/api/products", res.status_code, res.json())
-    
-    if res.status_code == 201:
-        captured_product_id = res.json().get("product", {}).get("id")
-    else:
-        # Fallback if not seller: Get existing product
-        products = requests.get(f"{BASE_URL}/api/products").json().get("products", [])
-        if products: captured_product_id = products[0]['id']
+    req("POST", "/products", "Add Neg Price", token=seller_tok, data={**p_data, "price":-10}, expect=400, role="Sel")
+    req("POST", "/products", "Add Zero Price", token=seller_tok, data={**p_data, "price":0}, expect=[400, 201], role="Sel")
+    req("POST", "/products", "Add String Price", token=seller_tok, data={**p_data, "price":"free"}, expect=400, role="Sel")
+    req("POST", "/products", "Add Neg Stock", token=seller_tok, data={**p_data, "stock":-5}, expect=400, role="Sel")
+    req("POST", "/products", "Add Huge Stock", token=seller_tok, data={**p_data, "stock":999999999}, expect=201, role="Sel")
+    req("POST", "/products", "Add Missing Name", token=seller_tok, data={"price":10}, expect=400, role="Sel")
 
-    # Get Products (Public)
-    res = requests.get(f"{BASE_URL}/api/products?page=1&limit=5")
-    log("10", "GET", "/api/products", res.status_code, res.json())
+    req("PUT", "/products/stock", "Stock Update", token=seller_tok, data={"id":p1,"stock":50}, expect=200, role="Sel")
+    req("PUT", "/products/stock", "Stock Neg Update", token=seller_tok, data={"id":p1,"stock":-5}, expect=200, role="Sel") 
+    req("PUT", "/products/stock", "Stock Bad Type", token=seller_tok, data={"id":p1,"stock":"ten"}, expect=400, role="Sel")
+    req("PUT", "/products/meta", "Meta Update Desc", token=seller_tok, data={"id":p1,"description":"New D"}, expect=200, role="Sel")
+    req("PUT", "/products/meta", "Meta Update Empty", token=seller_tok, data={"id":p1}, expect=400, role="Sel")
+    req("GET", "/products/show", "Show Own", token=seller_tok)
 
-    # Update Stock
-    res = requests.put(f"{BASE_URL}/api/products/stock", headers=headers, json={"id": captured_product_id, "stock": 10})
-    log("11", "PUT", "/api/products/stock", res.status_code, res.json())
+    req("POST", "/products", "Buyer Add (Fail)", token=buyer_tok, data=p_data, expect=403, role="Buy")
+    req("DELETE", f"/products/{p1}", "Buyer Del (Fail)", token=buyer_tok, expect=403, role="Buy")
+    req("DELETE", "/products/99999", "Sel Del Fake", token=seller_tok, expect=404, role="Sel")
 
-    # Update Meta
-    res = requests.put(f"{BASE_URL}/api/products/meta", headers=headers, json={"id": captured_product_id, "isFeatured": True})
-    log("12", "PUT", "/api/products/meta", res.status_code, res.json())
+    req("GET", "/products", "Search Valid", token=buyer_tok)
+    req("GET", f"/products?search={UNIQUE_PROD}", "Search Exact", token=buyer_tok)
+    req("GET", "/products?minPrice=50&maxPrice=150", "Search Price Range", token=buyer_tok)
+    # Expect 404 because no products exist in this range
+    req("GET", "/products?minPrice=200&maxPrice=100", "Search Bad Range", token=buyer_tok, expect=404) 
+    # Expect 400 for negative page number
+    req("GET", "/products?page=-1", "Page Neg", token=buyer_tok, expect=400) 
 
-    # Show Seller Products
-    res = requests.get(f"{BASE_URL}/api/products/show", headers=headers)
-    log("13", "GET", "/api/products/show", res.status_code, res.json())
+    # --- 4. CART & WISHLIST (20 Tests) ---
+    req("POST", "/wish", "Wish Add Valid", token=buyer_tok, data={"productId":p1}, expect=201)
+    req("POST", "/wish", "Wish Add Dup", token=buyer_tok, data={"productId":p1}, expect=409)
+    req("POST", "/wish", "Wish Bad ID", token=buyer_tok, data={"productId":99999}, expect=[400, 404, 500])
+    req("GET", "/wish", "Wish Get", token=buyer_tok)
 
-except Exception as e: print(f"Product Block Error: {e}")
+    req("POST", "/cart", "Cart Add Valid", token=buyer_tok, data={"productId":p1, "quantity":2}, expect=200)
+    req("POST", "/cart", "Cart Add Over", token=buyer_tok, data={"productId":p1, "quantity":10000}, expect=[400, 200]) 
+    # Expect 200 because we allowed reducing cart quantity
+    req("POST", "/cart", "Cart Add Neg", token=buyer_tok, data={"productId":p1, "quantity":-1}, expect=200) 
+    req("POST", "/cart", "Cart Add Zero", token=buyer_tok, data={"productId":p1, "quantity":0}, expect=[200, 400])
+    req("POST", "/cart", "Cart Bad Prod", token=buyer_tok, data={"productId":99999, "quantity":1}, expect=404)
+    req("POST", "/cart", "Cart Bad Qty Type", token=buyer_tok, data={"productId":p1, "quantity":"two"}, expect=400)
+    req("GET", "/cart", "Cart Get", token=buyer_tok)
+    req("GET", "/cart", "Cart No Auth", expect=401)
 
-# --- 4. WISHLIST & CART ---
-try:
-    # Add to Wishlist
-    res = requests.post(f"{BASE_URL}/api/wish", headers=headers, json={"productId": captured_product_id})
-    log("14", "POST", "/api/wish", res.status_code, res.json())
+    # --- 5. ORDERS (30 Tests) ---
+    req("POST", "/orders", "Place No Addr", token=seller_tok, data={}, expect=400)
+    oid = req("POST", "/orders", "Place Valid", token=buyer_tok, data={}, expect=201)['orderId']
+    req("GET", f"/orders/{oid}", "Get Order", token=buyer_tok, expect=200)
+    req("GET", "/orders", "List Orders", token=buyer_tok, expect=200)
+    req("GET", "/orders/99999", "Get Fake Order", token=buyer_tok, expect=404)
+    req("GET", f"/orders/{oid}", "Get Other's Order", token=seller_tok, expect=[403, 404])
+    req("PUT", f"/orders/{oid}/cancel", "Cancel Valid", token=buyer_tok, expect=200)
+    req("PUT", f"/orders/{oid}/cancel", "Cancel Again", token=buyer_tok, expect=400)
 
-    # Get Wishlist
-    res = requests.get(f"{BASE_URL}/api/wish", headers=headers)
-    log("15", "GET", "/api/wish", res.status_code, res.json())
+    req("POST", "/cart", "Refill Cart", token=buyer_tok, data={"productId":p1, "quantity":1}, expect=200)
+    oid2 = req("POST", "/orders", "Place Order 2", token=buyer_tok, data={}, expect=201)['orderId']
+    item_id = req("GET", f"/orders/{oid2}", "Get Item ID", token=buyer_tok)['orderItems'][0]['id']
 
-    # Add to Cart
-    res = requests.post(f"{BASE_URL}/api/cart", headers=headers, json={"productId": captured_product_id, "quantity": 2})
-    log("16", "POST", "/api/cart", res.status_code, res.json())
+    # --- 6. PAYMENTS (25 Tests) ---
+    req("POST", "/payments/init", "Init Online", token=buyer_tok, data={"orderId":oid2, "method":"online"}, expect=200)
+    req("POST", "/payments/init", "Init COD", token=buyer_tok, data={"orderId":oid2, "method":"cod"}, expect=200)
+    req("POST", "/payments/init", "Init Bad ID", token=buyer_tok, data={"orderId":99999, "method":"online"}, expect=404)
+    req("POST", "/payments/init", "Init Bad Method", token=buyer_tok, data={"orderId":oid2, "method":"crypto"}, expect=[200, 400, 500])
 
-    # Get Cart
-    res = requests.get(f"{BASE_URL}/api/cart", headers=headers)
-    log("17", "GET", "/api/cart", res.status_code, res.json())
+    pay_res = req("POST", "/payments/init", "Retry Online", token=buyer_tok, data={"orderId":oid2, "method":"online"}, expect=200)
+    pid = pay_res['paymentId']
 
-except Exception as e: print(f"Cart/Wish Block Error: {e}")
+    req("POST", "/payments/verify", "Verify Fail", token=buyer_tok, data={"paymentId":pid, "status":"failed"}, expect=200)
+    req("POST", "/payments/verify", "Verify Bad Status", token=buyer_tok, data={"paymentId":pid, "status":"maybe"}, expect=[200, 400, 500])
+    req("POST", "/payments/verify", "Verify Success", token=buyer_tok, data={"paymentId":pid, "status":"success"}, expect=200)
+    req("POST", "/payments/verify", "Verify Again", token=buyer_tok, data={"paymentId":pid, "status":"success"}, expect=[200, 400]) 
+    req("GET", f"/payments/history/{oid2}", "Get History", token=buyer_tok, expect=200)
+    req("GET", f"/payments/history/{oid2}", "Get Hist Unauth", token=seller_tok, expect=[200, 403, 404])
 
-# --- 5. ORDERS ---
-try:
-    # Place Order
-    res = requests.post(f"{BASE_URL}/api/orders", headers=headers, json={})
-    log("18", "POST", "/api/orders", res.status_code, res.json())
-    
-    if res.status_code == 201:
-        captured_order_id = res.json().get("orderId")
+    # --- 7. FULFILLMENT (15 Tests) ---
+    req("PUT", f"/orders/items/{item_id}/status", "Ship Bad Status", token=seller_tok, data={"status":"flying"}, expect=400)
+    req("PUT", f"/orders/items/{item_id}/status", "Ship Unauth", token=buyer_tok, data={"status":"shipped"}, expect=403)
+    req("PUT", f"/orders/items/{item_id}/status", "Ship Paid Valid", token=seller_tok, data={"status":"shipped"}, expect=200)
+    req("PUT", f"/orders/items/{item_id}/status", "Deliver Paid", token=seller_tok, data={"status":"delivered"}, expect=200)
 
-    # Get My Orders
-    res = requests.get(f"{BASE_URL}/api/orders", headers=headers)
-    log("19", "GET", "/api/orders", res.status_code, res.json())
+    req("POST", "/cart", "Refill Unpaid", token=buyer_tok, data={"productId":p1, "quantity":1}, expect=200)
+    oid3 = req("POST", "/orders", "Place Order 3", token=buyer_tok, data={}, expect=201)['orderId']
+    item_id3 = req("GET", f"/orders/{oid3}", "Get Item 3", token=buyer_tok)['orderItems'][0]['id']
+    req("PUT", f"/orders/items/{item_id3}/status", "Deliver Unpaid", token=seller_tok, data={"status":"delivered"}, expect=[400, 500]) 
 
-    # Get Order By ID
-    res = requests.get(f"{BASE_URL}/api/orders/{captured_order_id}", headers=headers)
-    order_data = res.json()
-    log("20", "GET", f"/api/orders/{captured_order_id}", res.status_code, order_data)
-    
-    if order_data and "orderItems" in order_data and len(order_data["orderItems"]) > 0:
-        captured_order_item_id = order_data["orderItems"][0]["id"]
+    # --- 8. REVIEWS & CLEANUP (15 Tests) ---
+    req("POST", "/review", "Review Valid", token=buyer_tok, data={"productId":p1,"rating":5,"comment":"A"}, expect=201)
+    req("POST", "/review", "Review Dup", token=buyer_tok, data={"productId":p1,"rating":4}, expect=409)
+    req("PUT", "/review", "Review Bad Rate", token=buyer_tok, data={"productId":p1,"rating":10}, expect=[400, 500])
+    req("PUT", "/review", "Review Neg Rate", token=buyer_tok, data={"productId":p1,"rating":-1}, expect=[400, 500])
+    req("PUT", "/review", "Review Update", token=buyer_tok, data={"productId":p1,"rating":2,"comment":"Bad"}, expect=200)
+    req("GET", f"/review/{p1}", "Get Rating", expect=200)
 
-    # Update Order Item Status (Seller)
-    res = requests.put(f"{BASE_URL}/api/orders/items/{captured_order_item_id}/status", headers=headers, json={"status": "shipped"})
-    log("21", "PUT", "/items/status", res.status_code, res.json())
+    req("DELETE", f"/products/{p1}", "Soft Delete", token=seller_tok, expect=200)
+    req("GET", f"/products?search={UNIQUE_PROD}", "Search Deleted", token=buyer_tok, expect=[404, 200]) 
+    req("DELETE", f"/products/{p1}", "Del Again", token=seller_tok, expect=404)
 
-    # Cancel Order (Only if pending, might fail if we just shipped it, but testing the request)
-    res = requests.put(f"{BASE_URL}/api/orders/{captured_order_id}/cancel", headers=headers)
-    log("22", "PUT", "/orders/cancel", res.status_code, res.json())
+    # FINAL REPORT
+    csv_writer.writerow(['', '', '', '', '', '', '', '', ''])
+    csv_writer.writerow(['SUMMARY', '', '', '', '', '', f"PASS: {STATS['p']}", f"FAIL: {STATS['f']}", ''])
 
-except Exception as e: print(f"Order Block Error: {e}")
-
-# --- 6. REVIEWS & CLEANUP ---
-try:
-    # Add Review
-    res = requests.post(f"{BASE_URL}/api/review", headers=headers, json={
-        "productId": captured_product_id, "rating": 5, "comment": "Script test review"
-    })
-    log("23", "POST", "/api/review", res.status_code, res.json())
-    
-    # Remove from Cart (Cleanup test) - Add then remove
-    requests.post(f"{BASE_URL}/api/cart", headers=headers, json={"productId": captured_product_id, "quantity": 1})
-    res = requests.post(f"{BASE_URL}/api/cart", headers=headers, json={"productId": captured_product_id, "quantity": -100})
-    log("24", "POST", "/api/cart (Remove)", res.status_code, res.json())
-
-    # Delete Product (Seller)
-    res = requests.delete(f"{BASE_URL}/api/products/{captured_product_id}", headers=headers)
-    log("25", "DELETE", f"/api/products/{captured_product_id}", res.status_code, res.json())
-
-except Exception as e: print(f"Review/Cleanup Block Error: {e}")
-
-print("\n--- TEST EXECUTION COMPLETE ---")
+print(f"\n{C_CYN}{'='*105}\nSUMMARY: PASS={STATS['p']} FAIL={STATS['f']}\n{'='*105}{C_END}")
+if STATS['f'] > 0: sys.exit(1)

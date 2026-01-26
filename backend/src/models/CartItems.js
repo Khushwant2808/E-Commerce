@@ -20,19 +20,17 @@ const CartItem = sequelize.define("CartItem", {
 
   quantity: {
     type: DataTypes.INTEGER,
-    defaultValue: 1,
-  },
-  
+    defaultValue: 1
+  }
 }, {
   tableName: "cart_items",
   timestamps: true,
   indexes: [
     {
       unique: true,
-      fields: ["cartId", "productId"],
-    },
-  ],
-}
-);
+      fields: ["cartId", "productId"]
+    }
+  ]
+});
 
 module.exports = CartItem;

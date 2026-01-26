@@ -1,15 +1,13 @@
 const { Review, User, Product } = require("../models");
 
 async function seedReviews() {
+  // Seeder disabled - uncomment to enable
   // const users = await User.findAll();
   // const products = await Product.findAll();
   // if (!users.length || !products.length) return;
-
   // const count = await Review.count();
   // if (count > 0) return;
-
   // const data = [];
-
   // users.forEach((u, i) => {
   //   products.forEach((p, j) => {
   //     if ((i + j) % 2 === 0) {
@@ -22,7 +20,6 @@ async function seedReviews() {
   //     }
   //   });
   // });
-
   // await Review.bulkCreate(data);
 }
 

@@ -30,7 +30,6 @@ async function addPhoneNumber(req, res, next) {
       message: "Number saved successfully",
       number
     });
-
   } catch (error) {
     if (error instanceof Sequelize.UniqueConstraintError) {
       return res.status(409).json({ message: "Number already exists" });
@@ -53,7 +52,6 @@ async function getPhoneNumber(req, res, next) {
     }
 
     return res.status(200).json(numbers);
-
   } catch (error) {
     next(error);
   }
@@ -83,7 +81,6 @@ async function updatePhoneNumber(req, res, next) {
       message: "Number saved successfully",
       number
     });
-
   } catch (error) {
     if (error instanceof Sequelize.UniqueConstraintError) {
       return res.status(409).json({ message: "Number already exists" });

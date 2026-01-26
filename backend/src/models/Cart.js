@@ -11,8 +11,8 @@ const Cart = sequelize.define("Cart", {
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    unique: true,
-  },
+    unique: true
+  }
 }, {
   tableName: "carts",
   timestamps: true,

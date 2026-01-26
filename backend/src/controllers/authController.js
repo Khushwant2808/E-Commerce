@@ -42,10 +42,9 @@ async function register(req, res, next) {
       user: {
         id: user.id,
         name: user.name,
-        email: user.email,
-      },
+        email: user.email
+      }
     });
-
   } catch (error) {
     if (error instanceof Sequelize.ValidationError) {
       return res.status(400).json({
@@ -105,9 +104,8 @@ async function login(req, res, next) {
         email: user.email,
         role: user.role,
         canSell: user.canSell
-      },
+      }
     });
-
   } catch (error) {
     if (error instanceof Sequelize.DatabaseError) {
       return res.status(500).json({ message: "Database error" });
@@ -122,14 +120,46 @@ async function verifyToken(req, res) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  return res.status(200).json({ 
+  return res.status(200).json({
     message: "Token verification successful",
     user: req.user
   });
+}
+
+async function becomeSeller(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.canSell) {
+      return res.status(400).json({ message: "You are already a seller" });
+    }
+
+    user.canSell = true;
+    await user.save();
+
+    return res.status(200).json({
+      message: "Congratulations! You are now a seller.",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        canSell: user.canSell
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
 module.exports = {
   register,
   login,
   verifyToken,
+  becomeSeller
 };

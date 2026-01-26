@@ -7,7 +7,7 @@ const app = require("./app");
 const PORT = process.env.PORT || 8000;
 
 async function resetDatabase() {
-  await sequelize.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public;');
+  await sequelize.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
 }
 
 (async () => {
@@ -27,7 +27,6 @@ async function resetDatabase() {
     app.listen(PORT, () => {
       console.log(`Server running on port http://localhost:${PORT}`);
     });
-
   } catch (error) {
     console.error("Unable to start server:", error);
   }

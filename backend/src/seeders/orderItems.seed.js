@@ -16,7 +16,7 @@ async function seedOrderItems() {
         orderId: order.id,
         productId: p.id,
         quantity: 1,
-        price: p.price, 
+        price: p.price,
         status: "pending"
       });
     });

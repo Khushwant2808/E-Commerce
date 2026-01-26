@@ -20,7 +20,7 @@ async function seedOrders() {
       userId: users[1].id,
       totalAmount: 25000,
       status: "shipped",
-      paymentStatus: "success",
+      paymentStatus: "paid",
       addressId: addresses[1].id
     }
   ]);

@@ -37,13 +37,24 @@ const Product = sequelize.define(
 
     imageUrl: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: true
     },
-    isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
-    isFeatured: { type: DataTypes.BOOLEAN, defaultValue: false },
-
-    rating: { type: DataTypes.FLOAT, defaultValue: 0 },
-    ratingCount: { type: DataTypes.INTEGER, defaultValue: 0 },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
+    },
+    isFeatured: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    rating: {
+      type: DataTypes.FLOAT,
+      defaultValue: 0
+    },
+    ratingCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    }
   },
   {
     tableName: "products",
@@ -51,4 +62,5 @@ const Product = sequelize.define(
     paranoid: true
   }
 );
+
 module.exports = Product;

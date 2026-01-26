@@ -16,7 +16,7 @@ const verifyIfSeller = async (req, res, next) => {
       return res.status(403).json({ message: "Seller access required" });
     }
     if (process.env.LOG !== "false") {
-        console.log("Seller Verified");
+      console.log("Seller Verified");
     }
     next();
   } catch (error) {
