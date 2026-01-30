@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
-import { productAPI } from '../services/api';
+import { productAPI, wishlistAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
 
 const ProductsPage = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [wishlistIds, setWishlistIds] = useState(new Set());
+    const { isAuthenticated } = useAuth();
     const [filters, setFilters] = useState({
         minPrice: '',
         maxPrice: '',
@@ -23,6 +26,38 @@ const ProductsPage = () => {
     useEffect(() => {
         fetchProducts();
     }, [filters.sort, pagination.currentPage, search]);
+
+    // Fetch wishlist when authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            // Verify token exists before fetching
+            const token = localStorage.getItem('token');
+            if (token) {
+                fetchWishlist();
+            } else {
+                console.warn('[Wishlist] User authenticated but no token found');
+            }
+        } else {
+            setWishlistIds(new Set());
+        }
+    }, [isAuthenticated]);
+
+    const fetchWishlist = async () => {
+        try {
+            const { data } = await wishlistAPI.get();
+            // Convert to numbers for consistent comparison
+            const ids = new Set((data.items || []).map(item => Number(item.productId)));
+            setWishlistIds(ids);
+            console.log('[Wishlist] Loaded wishlist IDs:', [...ids]);
+        } catch (error) {
+            // Silently handle auth errors - user might not be logged in yet
+            if (error.response?.status === 401) {
+                console.warn('[Wishlist] Not authenticated, skipping wishlist fetch');
+            } else {
+                console.error('Failed to fetch wishlist:', error);
+            }
+        }
+    };
 
     const fetchProducts = async () => {
         try {
@@ -48,6 +83,19 @@ const ProductsPage = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Callback to update wishlist state when toggled
+    const handleWishlistToggle = (productId, isNowWishlisted) => {
+        setWishlistIds(prev => {
+            const newSet = new Set(prev);
+            if (isNowWishlisted) {
+                newSet.add(productId);
+            } else {
+                newSet.delete(productId);
+            }
+            return newSet;
+        });
     };
 
     const handleSearch = (e) => {
@@ -192,7 +240,11 @@ const ProductsPage = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.05 }}
                                 >
-                                    <ProductCard product={product} />
+                                    <ProductCard
+                                        product={product}
+                                        isWishlisted={wishlistIds.has(Number(product.id))}
+                                        onWishlistToggle={handleWishlistToggle}
+                                    />
                                 </motion.div>
                             ))}
                         </div>

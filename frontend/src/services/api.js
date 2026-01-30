@@ -159,10 +159,16 @@ export const wishlistAPI = {
         return api.get('/wish');
     },
 
-    // POST /api/wish (toggle wishlist item)
+    // POST /api/wish (add to wishlist)
     toggle: (data) => {
         console.log('[Wishlist] Adding to wishlist:', data.productId);
         return api.post('/wish', data);
+    },
+
+    // DELETE /api/wish/:productId (remove from wishlist)
+    remove: (productId) => {
+        console.log('[Wishlist] Removing from wishlist:', productId);
+        return api.delete(`/wish/${productId}`);
     },
 };
 

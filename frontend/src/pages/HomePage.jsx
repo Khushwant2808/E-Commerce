@@ -2,16 +2,45 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, Zap, Shield, TruckIcon } from 'lucide-react';
-import { productAPI } from '../services/api';
+import { productAPI, wishlistAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
 
 const HomePage = () => {
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [wishlistIds, setWishlistIds] = useState(new Set());
+    const { isAuthenticated } = useAuth();
 
     useEffect(() => {
         fetchFeaturedProducts();
     }, []);
+
+    // Fetch wishlist when authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            const token = localStorage.getItem('token');
+            if (token) {
+                fetchWishlist();
+            }
+        } else {
+            setWishlistIds(new Set());
+        }
+    }, [isAuthenticated]);
+
+    const fetchWishlist = async () => {
+        try {
+            const { data } = await wishlistAPI.get();
+            // Convert to numbers for consistent comparison
+            const ids = new Set((data.items || []).map(item => Number(item.productId)));
+            setWishlistIds(ids);
+        } catch (error) {
+            // Silently handle auth errors
+            if (error.response?.status !== 401) {
+                console.error('Failed to fetch wishlist:', error);
+            }
+        }
+    };
 
     const fetchFeaturedProducts = async () => {
         try {
@@ -22,6 +51,19 @@ const HomePage = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Callback to update wishlist state when toggled
+    const handleWishlistToggle = (productId, isNowWishlisted) => {
+        setWishlistIds(prev => {
+            const newSet = new Set(prev);
+            if (isNowWishlisted) {
+                newSet.add(productId);
+            } else {
+                newSet.delete(productId);
+            }
+            return newSet;
+        });
     };
 
     return (
@@ -123,7 +165,11 @@ const HomePage = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.1 }}
                                 >
-                                    <ProductCard product={product} />
+                                    <ProductCard
+                                        product={product}
+                                        isWishlisted={wishlistIds.has(Number(product.id))}
+                                        onWishlistToggle={handleWishlistToggle}
+                                    />
                                 </motion.div>
                             ))}
                         </div>

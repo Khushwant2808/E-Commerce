@@ -70,7 +70,39 @@ async function getWishlist(req, res, next) {
   }
 }
 
+async function removeFromWishlist(req, res, next) {
+  try {
+    const { productId } = req.params;
+    const userId = req.user.id;
+
+    if (!productId) {
+      return res.status(400).json({ message: 'Product ID is required' });
+    }
+
+    const deleted = await Wishlist.destroy({
+      where: { userId, productId: Number(productId) }
+    });
+
+    if (!deleted) {
+      // Check if it exists to give better error
+      const exists = await Wishlist.findOne({ where: { userId, productId } });
+      if (!exists) {
+        return res.status(404).json({ message: 'Item not in wishlist' });
+      }
+    }
+
+    if (process.env.LOG === 'true') {
+      console.log(`[Wishlist] User ${userId} removed product ${productId}`);
+    }
+    return res.status(200).json({ message: 'Removed from wishlist' });
+  } catch (error) {
+    console.error('[Wishlist] Delete Error:', error.message);
+    next(error);
+  }
+}
+
 module.exports = {
   addToWishList,
-  getWishlist
+  getWishlist,
+  removeFromWishlist
 };

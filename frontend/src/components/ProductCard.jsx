@@ -5,12 +5,18 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { wishlistAPI } from '../services/api';
 import toast from 'react-hot-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, isWishlisted: initialWishlisted = false, onWishlistToggle }) => {
     const { addToCart } = useCart();
     const { isAuthenticated } = useAuth();
-    const [isWishlisted, setIsWishlisted] = useState(false);
+    const [isWishlisted, setIsWishlisted] = useState(initialWishlisted);
+    const [isToggling, setIsToggling] = useState(false);
+
+    // Sync with parent's wishlist state
+    useEffect(() => {
+        setIsWishlisted(initialWishlisted);
+    }, [initialWishlisted]);
 
     const handleAddToCart = (e) => {
         e.preventDefault();
@@ -23,12 +29,40 @@ const ProductCard = ({ product }) => {
             toast.error('Please login to add to wishlist');
             return;
         }
+
+        if (isToggling) return;
+
+        setIsToggling(true);
         try {
-            await wishlistAPI.toggle({ productId: product.id });
-            setIsWishlisted(!isWishlisted);
-            toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
+            if (isWishlisted) {
+                await wishlistAPI.remove(product.id);
+            } else {
+                await wishlistAPI.toggle({ productId: product.id });
+            }
+
+            const newState = !isWishlisted;
+            setIsWishlisted(newState);
+
+            if (onWishlistToggle) {
+                onWishlistToggle(product.id, newState);
+            }
+
+            toast.success(newState ? 'Added to wishlist' : 'Removed from wishlist');
         } catch (error) {
-            toast.error('Failed to update wishlist');
+            console.error('[Wishlist] Toggle error:', error);
+            if (error.response?.status === 409) {
+                setIsWishlisted(true);
+                if (onWishlistToggle) onWishlistToggle(product.id, true);
+                toast.success('Already in wishlist');
+            } else if (error.response?.status === 404 && isWishlisted) {
+                setIsWishlisted(false);
+                if (onWishlistToggle) onWishlistToggle(product.id, false);
+                toast.error('Item was not in your wishlist');
+            } else {
+                toast.error('Failed to update wishlist');
+            }
+        } finally {
+            setIsToggling(false);
         }
     };
 
@@ -47,10 +81,16 @@ const ProductCard = ({ product }) => {
                     <div className="absolute top-3 right-3 flex flex-col gap-2">
                         <button
                             onClick={toggleWishlist}
-                            className={`p-2 rounded-full backdrop-blur-md transition-colors ${isWishlisted ? 'bg-red-500/80' : 'bg-white/10 hover:bg-white/20'
-                                }`}
+                            disabled={isToggling}
+                            className={`p-2 rounded-full backdrop-blur-md transition-all duration-300 ${isWishlisted
+                                ? 'bg-red-500 text-white'
+                                : 'bg-white/10 hover:bg-white/20 text-white'
+                                } ${isToggling ? 'opacity-50' : ''}`}
                         >
-                            <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-white' : ''}`} />
+                            <Heart
+                                className={`w-5 h-5 transition-all duration-300 ${isWishlisted ? 'fill-white scale-110' : ''
+                                    }`}
+                            />
                         </button>
                     </div>
                     {product.stock < 10 && product.stock > 0 && (

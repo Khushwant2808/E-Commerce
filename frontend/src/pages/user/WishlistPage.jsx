@@ -27,7 +27,7 @@ const WishlistPage = () => {
 
     const handleRemove = async (productId) => {
         try {
-            await wishlistAPI.toggle({ productId });
+            await wishlistAPI.remove(productId);
             setWishlist(wishlist.filter(item => item.productId !== productId));
             toast.success('Removed from wishlist');
         } catch (error) {
