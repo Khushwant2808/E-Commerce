@@ -1,4 +1,4 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 
 const MainLayout = () => {
@@ -34,7 +34,7 @@ const MainLayout = () => {
                         <div>
                             <h4 className="font-semibold mb-4">About</h4>
                             <ul className="space-y-2 text-sm text-gray-400">
-                                <li><Link to="#" className="hover:text-white transition-colors">Our Story</Link></li>
+                                <li><Link to="/about" className="hover:text-white transition-colors">Our Story</Link></li>
                                 <li><Link to="#" className="hover:text-white transition-colors">Contact Us</Link></li>
                                 <li><Link to="#" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
                             </ul>

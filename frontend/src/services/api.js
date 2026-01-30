@@ -72,10 +72,10 @@ export const authAPI = {
         return api.post('/auth/login', data);
     },
 
-    // GET /api/auth/api/profile
+    // GET /api/auth/profile
     getProfile: () => {
         console.log('[Auth] Fetching user profile');
-        return api.get('/auth/api/profile');
+        return api.get('/auth/profile');
     },
 
     // PUT /api/auth/become-seller
