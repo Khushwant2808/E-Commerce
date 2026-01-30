@@ -83,7 +83,7 @@ const OrderDetailPage = () => {
                     <div className="glass-card">
                         <h3 className="text-xl font-bold mb-4">Items</h3>
                         <div className="space-y-4">
-                            {order.OrderItems?.map((item) => (
+                            {order.orderItems?.map((item) => (
                                 <div key={item.id} className="flex gap-4 pb-4 border-b border-white/10 last:border-0">
                                     <img
                                         src={item.Product?.imageUrl || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100'}

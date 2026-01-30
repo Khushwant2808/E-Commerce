@@ -1,4 +1,4 @@
-const { Cart, CartItem, Order, OrderItem, Product, Payment, Address, sequelize } = require("../models");
+const { Cart, CartItem, Order, OrderItem, Product, Payment, Address, User, PhoneNumber, sequelize } = require("../models");
 
 async function getMyOrders(req, res, next) {
   try {
@@ -128,7 +128,15 @@ async function getOrderById(req, res, next) {
       include: [
         {
           model: OrderItem,
-          as: "orderItems"
+          as: "orderItems",
+          include: [Product]
+        },
+        {
+          model: Address
+        },
+        {
+          model: User,
+          include: [PhoneNumber]
         }
       ]
     });
@@ -137,7 +145,18 @@ async function getOrderById(req, res, next) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    return res.status(200).json(order);
+    // Format for frontend
+    const orderData = order.toJSON();
+    if (order.Address) {
+      orderData.shippingAddress = `${order.Address.line1}${order.Address.line2 ? ', ' + order.Address.line2 : ''}, ${order.Address.city}, ${order.Address.state} - ${order.Address.pincode}`;
+    }
+
+    const userPhone = order.User?.PhoneNumber?.phone || order.User?.Number?.phone;
+    if (userPhone) {
+      orderData.phoneNumber = userPhone;
+    }
+
+    return res.status(200).json(orderData);
   } catch (error) {
     next(error);
   }
