@@ -3,6 +3,7 @@ const { Cart, CartItem, Order, OrderItem, Product, Payment, Address, sequelize }
 async function getMyOrders(req, res, next) {
   try {
     const userId = req.user.id;
+    console.log('[Orders] Fetching orders for user:', userId);
 
     const orders = await Order.findAll({
       where: { userId },
@@ -10,17 +11,27 @@ async function getMyOrders(req, res, next) {
       include: [
         {
           model: OrderItem,
-          as: "orderItems"
+          as: "orderItems",
+          include: [
+            {
+              model: Product,
+              attributes: ['id', 'name', 'price', 'imageUrl']
+            }
+          ]
+        },
+        {
+          model: Address,
+          attributes: ['line1', 'city', 'state', 'pincode']
         }
       ]
     });
 
-    if (!orders.length) {
-      return res.status(404).json({ message: "No orders found" });
-    }
+    console.log('[Orders] Found', orders.length, 'orders for user:', userId);
 
+    // Return empty array instead of 404 for better UX
     return res.status(200).json(orders);
   } catch (error) {
+    console.error('[Orders] Error fetching orders:', error.message);
     next(error);
   }
 }

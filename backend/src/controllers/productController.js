@@ -192,7 +192,8 @@ async function updateProductMeta(req, res, next) {
     }
 
     if (product.userId !== userId) {
-      return res.status(400).json({ message: "Product Not yours bitch" });
+      console.log('[Products] Unauthorized update attempt by user:', userId, 'on product:', id);
+      return res.status(403).json({ message: "You are not authorized to update this product" });
     }
 
     if (
@@ -252,6 +253,7 @@ async function deleteProduct(req, res, next) {
 module.exports = {
   addProduct,
   getProducts,
+  getProductById,
   updateStock,
   showProducts,
   deleteProduct,

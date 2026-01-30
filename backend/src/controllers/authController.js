@@ -33,9 +33,7 @@ async function register(req, res, next) {
       password: hashedPassword,
     });
 
-    if (process.env.LOG === "true") {
-      console.log("User registered:", user.id);
-    }
+    console.log('[Auth] User registered:', user.email, 'ID:', user.id);
 
     return res.status(201).json({
       message: "User registered successfully",
@@ -91,9 +89,7 @@ async function login(req, res, next) {
       { expiresIn: "1d" }
     );
 
-    if (process.env.LOG === "true") {
-      console.log("User logged in:", user.id);
-    }
+    console.log('[Auth] User logged in:', user.email, 'ID:', user.id);
 
     return res.status(200).json({
       message: "Login successful",

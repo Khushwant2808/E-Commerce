@@ -52,22 +52,19 @@ async function addAddress(req, res, next) {
 async function getAddresses(req, res, next) {
   try {
     const userId = req.user.id;
+    console.log('[Address] Fetching addresses for user:', userId);
 
     const addresses = await Address.findAll({
       where: { userId },
       order: [["isDefault", "DESC"], ["createdAt", "DESC"]]
     });
 
-    if (!addresses.length) {
-      return res.status(404).json({ message: "No addresses found" });
-    }
+    console.log('[Address] Found', addresses.length, 'addresses');
 
-    if (process.env.LOG !== "false") {
-      console.log("Addresses fetched", userId);
-    }
-
+    // Return empty array for better UX (allows frontend to show "Add Address" prompt)
     return res.status(200).json(addresses);
   } catch (error) {
+    console.error('[Address] Error fetching addresses:', error.message);
     next(error);
   }
 }

@@ -109,8 +109,8 @@ const ProductDetailPage = () => {
                                         <Star
                                             key={i}
                                             className={`w-5 h-5 ${i < Math.floor(product.rating || 0)
-                                                    ? 'fill-yellow-400 text-yellow-400'
-                                                    : 'text-gray-600'
+                                                ? 'fill-yellow-400 text-yellow-400'
+                                                : 'text-gray-600'
                                                 }`}
                                         />
                                     ))}
@@ -197,17 +197,23 @@ const ProductDetailPage = () => {
                         <div className="space-y-4">
                             {reviews.map((review) => (
                                 <div key={review.id} className="border-b border-white/10 pb-4 last:border-0">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star
-                                                key={i}
-                                                className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-600'
-                                                    }`}
-                                            />
-                                        ))}
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star
+                                                    key={i}
+                                                    className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-600'}`}
+                                                />
+                                            ))}
+                                        </div>
+                                        <span className="text-sm text-gray-500">
+                                            {new Date(review.createdAt).toLocaleDateString()}
+                                        </span>
                                     </div>
-                                    <p className="text-gray-300">{review.review}</p>
-                                    <p className="text-sm text-gray-500 mt-2">By {review.User?.name || 'Anonymous'}</p>
+                                    <p className="text-gray-300 mb-2">{review.comment}</p>
+                                    <p className="text-sm text-gray-400">
+                                        — {review.userName || 'Anonymous'}
+                                    </p>
                                 </div>
                             ))}
                         </div>

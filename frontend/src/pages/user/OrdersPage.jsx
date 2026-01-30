@@ -58,18 +58,55 @@ const OrdersPage = () => {
                                         <div>
                                             <p className="font-semibold text-lg">Order #{order.id}</p>
                                             <p className="text-sm text-gray-400">
-                                                {new Date(order.createdAt).toLocaleDateString()}
+                                                {new Date(order.createdAt).toLocaleDateString('en-US', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric'
+                                                })}
                                             </p>
                                         </div>
-                                        <span className="badge-info">{order.status}</span>
+                                        <div className="flex gap-2">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${order.status === 'delivered' ? 'bg-green-500/20 text-green-400' :
+                                                    order.status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
+                                                        order.status === 'shipped' ? 'bg-blue-500/20 text-blue-400' :
+                                                            'bg-yellow-500/20 text-yellow-400'
+                                                }`}>
+                                                {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
+                                            </span>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${order.paymentStatus === 'paid' ? 'bg-green-500/20 text-green-400' :
+                                                    order.paymentStatus === 'failed' ? 'bg-red-500/20 text-red-400' :
+                                                        'bg-orange-500/20 text-orange-400'
+                                                }`}>
+                                                {order.paymentStatus?.charAt(0).toUpperCase() + order.paymentStatus?.slice(1) || 'Pending'}
+                                            </span>
+                                        </div>
                                     </div>
+
+                                    {/* Product Images */}
+                                    {order.orderItems && order.orderItems.length > 0 && (
+                                        <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+                                            {order.orderItems.slice(0, 4).map((item, i) => (
+                                                <img
+                                                    key={i}
+                                                    src={item.Product?.imageUrl || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100'}
+                                                    alt={item.Product?.name}
+                                                    className="w-14 h-14 rounded-lg object-cover"
+                                                />
+                                            ))}
+                                            {order.orderItems.length > 4 && (
+                                                <div className="w-14 h-14 rounded-lg bg-white/10 flex items-center justify-center text-sm text-gray-400">
+                                                    +{order.orderItems.length - 4}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
 
                                     <div className="flex justify-between items-center">
                                         <p className="text-gray-400">
-                                            {order.OrderItems?.length || 0} items
+                                            {order.orderItems?.length || 0} items
                                         </p>
                                         <p className="text-2xl font-bold gradient-text">
-                                            ${parseFloat(order.totalAmount).toFixed(2)}
+                                            ${parseFloat(order.totalAmount || 0).toFixed(2)}
                                         </p>
                                     </div>
                                 </Link>

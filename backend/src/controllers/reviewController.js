@@ -96,24 +96,48 @@ async function updateReview(req, res, next) {
 async function getProductRating(req, res, next) {
   try {
     const { productId } = req.params;
+    console.log('[Reviews] Fetching reviews for product:', productId);
 
     if (!productId) {
       return res.status(400).json({ message: "Product required" });
     }
 
     const product = await Product.findByPk(productId, {
-      attributes: ["rating", "ratingCount"]
+      attributes: ["id", "name", "rating", "ratingCount"]
     });
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
+    // Get all reviews with user names
+    const reviews = await Review.findAll({
+      where: { productId },
+      include: [
+        {
+          association: 'User',
+          attributes: ['id', 'name']
+        }
+      ],
+      order: [["createdAt", "DESC"]]
+    });
+
+    console.log('[Reviews] Found', reviews.length, 'reviews for product:', productId);
+
     return res.status(200).json({
       rating: product.rating,
-      ratingCount: product.ratingCount
+      ratingCount: product.ratingCount,
+      reviews: reviews.map(review => ({
+        id: review.id,
+        rating: review.rating,
+        comment: review.comment,
+        userName: review.User?.name || 'Anonymous',
+        userId: review.userId,
+        createdAt: review.createdAt
+      }))
     });
   } catch (error) {
+    console.error('[Reviews] Error fetching reviews:', error.message);
     next(error);
   }
 }
