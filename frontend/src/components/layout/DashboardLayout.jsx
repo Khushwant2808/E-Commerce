@@ -38,7 +38,7 @@ const DashboardLayout = () => {
             <motion.aside
                 initial={{ x: -280 }}
                 animate={{ x: isSidebarOpen ? 0 : -280 }}
-                className="fixed left-0 top-0 h-full w-70 glass border-r border-white/10 z-40"
+                className="fixed left-0 top-0 h-full w-72 glass border-r border-white/10 z-50"
             >
                 <div className="p-6">
                     <Link to="/" className="flex items-center space-x-2 mb-8">
@@ -60,8 +60,8 @@ const DashboardLayout = () => {
                                     key={link.to}
                                     to={link.to}
                                     className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
-                                            ? 'bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 text-white'
-                                            : 'hover:bg-white/5 text-gray-400 hover:text-white'
+                                        ? 'bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 text-white'
+                                        : 'hover:bg-white/5 text-gray-400 hover:text-white'
                                         }`}
                                 >
                                     <Icon className="w-5 h-5" />
@@ -83,7 +83,7 @@ const DashboardLayout = () => {
                 </div>
             </motion.aside>
 
-            <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-70' : 'ml-0'}`}>
+            <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-72' : 'ml-0'}`}>
                 <header className="h-16 glass border-b border-white/10 flex items-center justify-between px-6 sticky top-0 z-30">
                     <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
