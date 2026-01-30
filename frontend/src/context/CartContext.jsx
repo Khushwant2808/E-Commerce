@@ -34,24 +34,49 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    const updateCart = async (productId, newQuantity) => {
+    const incrementItem = async (productId) => {
         try {
-            await cartAPI.update({ productId, quantity: newQuantity });
+            await cartAPI.increment({ productId });
             await fetchCart();
         } catch (error) {
             const message = error.response?.data?.message || 'Failed to update cart';
             toast.error(message);
-            console.error('Update cart error:', error);
+            console.error('Increment item error:', error);
         }
     };
 
-    // This `addToCart` function was incomplete and malformed in the original snippet.
-    // I'm reconstructing it based on the surrounding code.
-    const addToCart = async (productId) => {
+    const decrementItem = async (productId) => {
         try {
-            const existingItem = cart.find(item => item.productId === productId);
-            await updateCart(productId, existingItem ? existingItem.quantity + 1 : 1);
+            await cartAPI.decrement({ productId });
+            await fetchCart();
+        } catch (error) {
+            const message = error.response?.data?.message || 'Failed to update cart';
+            toast.error(message);
+            console.error('Decrement item error:', error);
+        }
+    };
+
+    const updateCart = async (productId, newQuantity) => {
+        const item = cart.find(i => i.productId === productId);
+        if (!item) return;
+
+        if (newQuantity === 0) {
+            await removeFromCart(productId);
+            return;
+        }
+
+        if (newQuantity > item.quantity) {
+            await incrementItem(productId);
+        } else if (newQuantity < item.quantity) {
+            await decrementItem(productId);
+        }
+    };
+
+    const addToCart = async (productId, quantity = 1) => {
+        try {
+            await cartAPI.add({ productId, quantity });
             toast.success('Added to cart');
+            await fetchCart();
         } catch (error) {
             toast.error('Failed to add to cart');
             console.error('Add to cart error:', error);
@@ -60,7 +85,7 @@ export const CartProvider = ({ children }) => {
 
     const removeFromCart = async (productId) => {
         try {
-            await cartAPI.update({ productId, quantity: 0 });
+            await cartAPI.remove({ productId });
             await fetchCart();
             toast.success('Item removed from cart');
         } catch (error) {
@@ -71,10 +96,16 @@ export const CartProvider = ({ children }) => {
     };
 
     const clearCart = async () => {
-        for (const item of cart) {
-            await updateCart(item.productId, 0);
+        // Implementation might need to change if we want a clear endpoint, 
+        // but looping remove is fine for now provided it waits.
+        // Parallelizing requests might be better.
+        try {
+            await Promise.all(cart.map(item => cartAPI.remove({ productId: item.productId })));
+            setCart([]);
+            await fetchCart();
+        } catch (error) {
+            console.error('Clear cart error:', error);
         }
-        setCart([]);
     };
 
     const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -87,6 +118,8 @@ export const CartProvider = ({ children }) => {
             addToCart,
             updateCart,
             removeFromCart,
+            incrementItem,
+            decrementItem,
             clearCart,
             fetchCart,
             totalItems,

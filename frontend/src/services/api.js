@@ -142,10 +142,28 @@ export const cartAPI = {
         return api.get('/cart');
     },
 
-    // POST /api/cart (add/update quantity)
-    update: (data) => {
-        console.log('[Cart] Updating cart:', data);
-        return api.post('/cart', data);
+    // POST /api/cart/add
+    add: (data) => {
+        console.log('[Cart] Adding to cart:', data);
+        return api.post('/cart/add', data);
+    },
+
+    // POST /api/cart/remove
+    remove: (data) => {
+        console.log('[Cart] Removing from cart:', data);
+        return api.post('/cart/remove', data);
+    },
+
+    // PUT /api/cart/increment
+    increment: (data) => {
+        console.log('[Cart] Incrementing item:', data);
+        return api.put('/cart/increment', data);
+    },
+
+    // PUT /api/cart/decrement
+    decrement: (data) => {
+        console.log('[Cart] Decrementing item:', data);
+        return api.put('/cart/decrement', data);
     },
 };
 

@@ -4,7 +4,7 @@ import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const CartPage = () => {
-    const { cart, updateCart, removeFromCart, totalPrice, loading } = useCart();
+    const { cart, removeFromCart, incrementItem, decrementItem, totalPrice, loading } = useCart();
     const navigate = useNavigate();
 
     if (loading) {
@@ -72,14 +72,14 @@ const CartPage = () => {
                                     <div className="flex items-center gap-4 mt-4">
                                         <div className="flex items-center gap-2">
                                             <button
-                                                onClick={() => updateCart(item.productId, item.quantity - 1)}
+                                                onClick={() => decrementItem(item.productId)}
                                                 className="w-8 h-8 flex items-center justify-center glass rounded-lg hover:bg-white/10"
                                             >
                                                 <Minus className="w-4 h-4" />
                                             </button>
                                             <span className="w-8 text-center font-semibold">{item.quantity}</span>
                                             <button
-                                                onClick={() => updateCart(item.productId, item.quantity + 1)}
+                                                onClick={() => incrementItem(item.productId)}
                                                 className="w-8 h-8 flex items-center justify-center glass rounded-lg hover:bg-white/10"
                                             >
                                                 <Plus className="w-4 h-4" />
