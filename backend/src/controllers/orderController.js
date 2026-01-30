@@ -136,7 +136,7 @@ async function getOrderById(req, res, next) {
         },
         {
           model: User,
-          include: [PhoneNumber]
+          include: [{ model: PhoneNumber, as: 'PhoneNumber' }]
         }
       ]
     });

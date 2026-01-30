@@ -1,5 +1,5 @@
 const bcrypt = require("bcryptjs");
-const User = require("../models/User");
+const { User, PhoneNumber } = require("../models");
 const jwt = require("jsonwebtoken");
 const { Sequelize } = require("sequelize");
 
@@ -39,23 +39,25 @@ async function register(req, res, next) {
     const token = jwt.sign(
       {
         id: user.id,
+        email: user.email,
         name: user.name,
         role: user.role,
         canSell: user.canSell
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "24h" }
     );
 
     return res.status(201).json({
-      message: "User registered successfully",
+      message: "User registered successfully!",
       token,
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
-        canSell: user.canSell
+        canSell: user.canSell,
+        phone: null // New user has no phone yet
       }
     });
   } catch (error) {
@@ -79,29 +81,29 @@ async function login(req, res, next) {
 
     const user = await User.findOne({
       where: { email },
-      attributes: ["id", "password", "name", "email", "role", "canSell"],
-      raw: true
+      include: [PhoneNumber]
     });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     const token = jwt.sign(
       {
         id: user.id,
+        email: user.email,
         name: user.name,
         role: user.role,
         canSell: user.canSell
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "24h" }
     );
 
     console.log('[Auth] User logged in:', user.email, 'ID:', user.id);
@@ -114,7 +116,8 @@ async function login(req, res, next) {
         name: user.name,
         email: user.email,
         role: user.role,
-        canSell: user.canSell
+        canSell: user.canSell,
+        phone: user.PhoneNumber?.phone
       }
     });
   } catch (error) {
@@ -126,15 +129,81 @@ async function login(req, res, next) {
   }
 }
 
-async function verifyToken(req, res) {
-  if (!req.user || !req.user.id) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
+async function verifyToken(req, res, next) {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-  return res.status(200).json({
-    message: "Token verification successful",
-    user: req.user
-  });
+    const user = await User.findByPk(req.user.id, {
+      include: [{ model: PhoneNumber, as: 'PhoneNumber' }]
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      message: "Token verification successful",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        canSell: user.canSell,
+        phone: user.PhoneNumber?.phone
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function updateProfile(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const { name, email, phone } = req.body;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (name) user.name = name;
+    if (email) user.email = email;
+    await user.save();
+
+    if (phone) {
+      let phoneNumber = await PhoneNumber.findOne({ where: { userId } });
+      if (phoneNumber) {
+        phoneNumber.phone = phone;
+        await phoneNumber.save();
+      } else {
+        await PhoneNumber.create({ userId, phone });
+      }
+    }
+
+    const updatedUser = await User.findByPk(userId, {
+      include: [{ model: PhoneNumber, as: 'PhoneNumber' }]
+    });
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        canSell: updatedUser.canSell,
+        phone: updatedUser.PhoneNumber?.phone
+      }
+    });
+  } catch (error) {
+    if (error instanceof Sequelize.UniqueConstraintError) {
+      return res.status(400).json({ message: "Email or phone number already in use" });
+    }
+    next(error);
+  }
 }
 
 async function becomeSeller(req, res, next) {
@@ -160,10 +229,12 @@ async function becomeSeller(req, res, next) {
         name: user.name,
         email: user.email,
         role: user.role,
-        canSell: user.canSell
+        canSell: user.canSell,
+        phone: user.PhoneNumber?.phone
       }
     });
   } catch (error) {
+    await transaction?.rollback();
     next(error);
   }
 }
@@ -172,5 +243,6 @@ module.exports = {
   register,
   login,
   verifyToken,
+  updateProfile,
   becomeSeller
 };

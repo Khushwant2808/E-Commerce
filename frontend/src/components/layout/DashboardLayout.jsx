@@ -16,7 +16,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const { isAdmin } = useAuth();
+    const { user, isAdmin } = useAuth();
     const location = useLocation();
 
     const sellerLinks = [
@@ -93,6 +93,14 @@ const DashboardLayout = () => {
                     </button>
 
                     <div className="flex items-center space-x-4">
+                        <div className="hidden md:flex flex-col items-end mr-2">
+                            <span className="text-sm font-bold text-white leading-none mb-1">{user?.name}</span>
+                            <span className="text-xs text-gray-500 leading-none">{user?.email}</span>
+                        </div>
+                        <Link to="/profile" className="w-10 h-10 bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-lg border border-white/5 flex items-center justify-center hover:border-purple-500/50 transition-all group">
+                            <Users className="w-5 h-5 text-gray-400 group-hover:text-purple-400" />
+                        </Link>
+                        <div className="h-8 w-px bg-white/10 mx-2"></div>
                         <div className="glass px-4 py-2 rounded-lg flex items-center space-x-2">
                             <DollarSign className="w-4 h-4 text-green-400" />
                             <span className="text-sm font-semibold">Sales Today: $0</span>

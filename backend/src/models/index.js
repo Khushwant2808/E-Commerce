@@ -12,7 +12,7 @@ const Payment = require("./Payment");
 const Review = require("./Review");
 const Wishlist = require("./Wishlist");
 
-User.hasOne(PhoneNumber, { foreignKey: "userId", onDelete: "CASCADE" });
+User.hasOne(PhoneNumber, { as: "PhoneNumber", foreignKey: "userId", onDelete: "CASCADE" });
 PhoneNumber.belongsTo(User, { foreignKey: "userId" });
 
 User.hasMany(Address, { foreignKey: "userId", onDelete: "CASCADE" });
