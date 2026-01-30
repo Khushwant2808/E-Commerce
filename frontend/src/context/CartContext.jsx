@@ -18,11 +18,11 @@ export const CartProvider = ({ children }) => {
         }
     }, [isAuthenticated]);
 
-    const fetchCart = async () => {
+    const fetchCart = async (showLoading = true) => {
         if (!isAuthenticated) return;
 
         try {
-            setLoading(true);
+            if (showLoading) setLoading(true);
             const { data } = await cartAPI.get();
             setCart(data || []);
         } catch (error) {
@@ -30,14 +30,14 @@ export const CartProvider = ({ children }) => {
             console.error('Failed to fetch cart:', error);
             setCart([]);
         } finally {
-            setLoading(false);
+            if (showLoading) setLoading(false);
         }
     };
 
     const incrementItem = async (productId) => {
         try {
             await cartAPI.increment({ productId });
-            await fetchCart();
+            await fetchCart(false);
         } catch (error) {
             const message = error.response?.data?.message || 'Failed to update cart';
             toast.error(message);
@@ -48,7 +48,7 @@ export const CartProvider = ({ children }) => {
     const decrementItem = async (productId) => {
         try {
             await cartAPI.decrement({ productId });
-            await fetchCart();
+            await fetchCart(false);
         } catch (error) {
             const message = error.response?.data?.message || 'Failed to update cart';
             toast.error(message);
@@ -76,7 +76,7 @@ export const CartProvider = ({ children }) => {
         try {
             await cartAPI.add({ productId, quantity });
             toast.success('Added to cart');
-            await fetchCart();
+            await fetchCart(false);
         } catch (error) {
             toast.error('Failed to add to cart');
             console.error('Add to cart error:', error);
@@ -86,7 +86,7 @@ export const CartProvider = ({ children }) => {
     const removeFromCart = async (productId) => {
         try {
             await cartAPI.remove({ productId });
-            await fetchCart();
+            await fetchCart(false);
             toast.success('Item removed from cart');
         } catch (error) {
             const message = error.response?.data?.message || 'Failed to remove item';
@@ -102,7 +102,7 @@ export const CartProvider = ({ children }) => {
         try {
             await Promise.all(cart.map(item => cartAPI.remove({ productId: item.productId })));
             setCart([]);
-            await fetchCart();
+            await fetchCart(false);
         } catch (error) {
             console.error('Clear cart error:', error);
         }
