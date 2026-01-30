@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import Navbar from './Navbar';
 
 const MainLayout = () => {
@@ -18,25 +18,25 @@ const MainLayout = () => {
                         <div>
                             <h4 className="font-semibold mb-4">Shop</h4>
                             <ul className="space-y-2 text-sm text-gray-400">
-                                <li><a href="/products" className="hover:text-white transition-colors">All Products</a></li>
-                                <li><a href="/products?featured=true" className="hover:text-white transition-colors">Featured</a></li>
-                                <li><a href="/products?sort=price" className="hover:text-white transition-colors">Best Deals</a></li>
+                                <li><Link to="/products" className="hover:text-white transition-colors">All Products</Link></li>
+                                <li><Link to="/products?featured=true" className="hover:text-white transition-colors">Featured</Link></li>
+                                <li><Link to="/products?sort=price" className="hover:text-white transition-colors">Best Deals</Link></li>
                             </ul>
                         </div>
                         <div>
                             <h4 className="font-semibold mb-4">Customer Service</h4>
                             <ul className="space-y-2 text-sm text-gray-400">
-                                <li><a href="/orders" className="hover:text-white transition-colors">Track Order</a></li>
-                                <li><a href="/profile" className="hover:text-white transition-colors">My Account</a></li>
-                                <li><a href="/wishlist" className="hover:text-white transition-colors">Wishlist</a></li>
+                                <li><Link to="/orders" className="hover:text-white transition-colors">Track Order</Link></li>
+                                <li><Link to="/profile" className="hover:text-white transition-colors">My Account</Link></li>
+                                <li><Link to="/wishlist" className="hover:text-white transition-colors">Wishlist</Link></li>
                             </ul>
                         </div>
                         <div>
                             <h4 className="font-semibold mb-4">About</h4>
                             <ul className="space-y-2 text-sm text-gray-400">
-                                <li><a href="#" className="hover:text-white transition-colors">Our Story</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">Terms & Conditions</a></li>
+                                <li><Link to="#" className="hover:text-white transition-colors">Our Story</Link></li>
+                                <li><Link to="#" className="hover:text-white transition-colors">Contact Us</Link></li>
+                                <li><Link to="#" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
                             </ul>
                         </div>
                     </div>
