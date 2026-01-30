@@ -47,9 +47,10 @@ const CheckoutPage = () => {
             // Fetch phone
             try {
                 const phoneRes = await phoneAPI.get();
-                if (phoneRes.data?.phoneNumber) {
-                    setPhone(phoneRes.data.phoneNumber);
-                    setNewPhone(phoneRes.data.phoneNumber);
+                if (Array.isArray(phoneRes.data) && phoneRes.data.length > 0) {
+                    const savedPhone = phoneRes.data[0].phone;
+                    setPhone(savedPhone);
+                    setNewPhone(savedPhone);
                 }
             } catch (err) {
                 // No phone saved - that's ok
@@ -87,9 +88,9 @@ const CheckoutPage = () => {
         setLoading(true);
         try {
             if (phone) {
-                await phoneAPI.update({ phoneNumber: newPhone });
+                await phoneAPI.update({ phone: newPhone });
             } else {
-                await phoneAPI.add({ phoneNumber: newPhone });
+                await phoneAPI.add({ phone: newPhone });
             }
             setPhone(newPhone);
             setEditingPhone(false);
@@ -148,7 +149,7 @@ const CheckoutPage = () => {
     const canProceed = () => {
         switch (step) {
             case 1: return selectedAddress !== null;
-            case 2: return true; // Phone is optional
+            case 2: return !!phone; // Phone is required for delivery updates
             case 3: return paymentMethod !== null;
             default: return true;
         }
@@ -204,8 +205,8 @@ const CheckoutPage = () => {
                             <div key={s.num} className="flex items-center">
                                 <div
                                     className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${step >= s.num
-                                            ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
-                                            : 'bg-white/5 text-gray-500'
+                                        ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+                                        : 'bg-white/5 text-gray-500'
                                         }`}
                                 >
                                     {step > s.num ? <Check className="w-5 h-5" /> : <s.icon className="w-5 h-5" />}
@@ -252,8 +253,8 @@ const CheckoutPage = () => {
                                                     key={addr.id}
                                                     onClick={() => setSelectedAddress(addr)}
                                                     className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedAddress?.id === addr.id
-                                                            ? 'border-purple-500 bg-purple-500/10'
-                                                            : 'border-white/10 hover:border-white/30'
+                                                        ? 'border-purple-500 bg-purple-500/10'
+                                                        : 'border-white/10 hover:border-white/30'
                                                         }`}
                                                 >
                                                     <div className="flex justify-between items-start">
@@ -380,41 +381,99 @@ const CheckoutPage = () => {
                                         Contact Number
                                     </h2>
 
-                                    {!editingPhone && phone ? (
-                                        <div className="p-4 bg-white/5 rounded-xl flex justify-between items-center">
-                                            <div>
-                                                <p className="text-gray-400 text-sm">Phone Number</p>
-                                                <p className="text-xl font-semibold">{phone}</p>
-                                            </div>
-                                            <button onClick={() => setEditingPhone(true)} className="btn-secondary">
-                                                <Edit2 className="w-4 h-4 mr-2" /> Edit
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-4">
-                                            <p className="text-gray-400">
-                                                {phone ? 'Update your phone number' : 'Add a phone number for delivery updates'}
-                                            </p>
-                                            <input
-                                                type="tel"
-                                                placeholder="10-digit phone number"
-                                                value={newPhone}
-                                                onChange={e => setNewPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                                                className="input-field text-xl tracking-wider"
-                                                maxLength={10}
-                                            />
-                                            <div className="flex gap-4">
-                                                <button onClick={handleSavePhone} disabled={loading} className="btn-primary flex-1">
-                                                    {loading ? 'Saving...' : 'Save Phone'}
-                                                </button>
-                                                {phone && (
-                                                    <button onClick={() => setEditingPhone(false)} className="btn-secondary flex-1">
-                                                        Cancel
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
+                                    <AnimatePresence mode="wait">
+                                        {!editingPhone && phone ? (
+                                            <motion.div
+                                                key="view"
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, scale: 0.95 }}
+                                                className="relative group overflow-hidden glass-card !p-0"
+                                            >
+                                                <div className="p-8 flex justify-between items-center relative z-10">
+                                                    <div className="flex items-center gap-6">
+                                                        <div className="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center">
+                                                            <Phone className="w-8 h-8 text-purple-400" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-gray-400 text-sm uppercase tracking-widest mb-1 italic">Verified Contact</p>
+                                                            <p className="text-3xl font-bold tracking-tighter text-white">
+                                                                {phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3')}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                        onClick={() => {
+                                                            setNewPhone(phone);
+                                                            setEditingPhone(true);
+                                                        }}
+                                                        className="w-12 h-12 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
+                                                    >
+                                                        <Edit2 className="w-5 h-5 text-gray-400" />
+                                                    </motion.button>
+                                                </div>
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-3xl rounded-full -mr-16 -mt-16"></div>
+                                            </motion.div>
+                                        ) : (
+                                            <motion.div
+                                                key="edit"
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, scale: 0.95 }}
+                                                className="space-y-6"
+                                            >
+                                                <div className="p-6 bg-white/5 rounded-2xl border border-white/5">
+                                                    <p className="text-gray-400 text-sm mb-4">
+                                                        {phone ? 'Keep your contact info up to date for delivery notifications' : 'Enter your mobile number to receive real-time shipping updates'}
+                                                    </p>
+                                                    <div className="relative">
+                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-500 border-r border-white/10 pr-4">
+                                                            <span className="text-sm font-bold">+91</span>
+                                                        </div>
+                                                        <input
+                                                            type="tel"
+                                                            placeholder="000 000 0000"
+                                                            value={newPhone}
+                                                            onChange={e => setNewPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                                            className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-20 pr-4 text-2xl font-bold tracking-[0.2em] focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 transition-all outline-none"
+                                                            maxLength={10}
+                                                            autoFocus
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-4">
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.02 }}
+                                                        whileTap={{ scale: 0.98 }}
+                                                        onClick={handleSavePhone}
+                                                        disabled={loading}
+                                                        className="btn-primary flex-1 py-4 text-lg"
+                                                    >
+                                                        {loading ? (
+                                                            <div className="flex items-center justify-center gap-2">
+                                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                                                <span>Syncing...</span>
+                                                            </div>
+                                                        ) : (
+                                                            'Confirm Number'
+                                                        )}
+                                                    </motion.button>
+                                                    {phone && (
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.02 }}
+                                                            whileTap={{ scale: 0.98 }}
+                                                            onClick={() => setEditingPhone(false)}
+                                                            className="btn-secondary px-8"
+                                                        >
+                                                            Cancel
+                                                        </motion.button>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </motion.div>
                             )}
 
@@ -436,8 +495,8 @@ const CheckoutPage = () => {
                                         <div
                                             onClick={() => setPaymentMethod('cod')}
                                             className={`p-6 rounded-xl border-2 cursor-pointer transition-all flex items-center gap-4 ${paymentMethod === 'cod'
-                                                    ? 'border-purple-500 bg-purple-500/10'
-                                                    : 'border-white/10 hover:border-white/30'
+                                                ? 'border-purple-500 bg-purple-500/10'
+                                                : 'border-white/10 hover:border-white/30'
                                                 }`}
                                         >
                                             <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
@@ -453,8 +512,8 @@ const CheckoutPage = () => {
                                         <div
                                             onClick={() => setPaymentMethod('online')}
                                             className={`p-6 rounded-xl border-2 cursor-pointer transition-all flex items-center gap-4 ${paymentMethod === 'online'
-                                                    ? 'border-purple-500 bg-purple-500/10'
-                                                    : 'border-white/10 hover:border-white/30'
+                                                ? 'border-purple-500 bg-purple-500/10'
+                                                : 'border-white/10 hover:border-white/30'
                                                 }`}
                                         >
                                             <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
