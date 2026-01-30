@@ -35,12 +35,27 @@ async function register(req, res, next) {
 
     console.log('[Auth] User registered:', user.email, 'ID:', user.id);
 
+    // Generate JWT token for immediate login
+    const token = jwt.sign(
+      {
+        id: user.id,
+        name: user.name,
+        role: user.role,
+        canSell: user.canSell
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
     return res.status(201).json({
       message: "User registered successfully",
+      token,
       user: {
         id: user.id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        role: user.role,
+        canSell: user.canSell
       }
     });
   } catch (error) {

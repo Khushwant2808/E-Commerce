@@ -15,14 +15,14 @@ async function resetDatabase() {
     await sequelize.authenticate();
     console.log("PostgreSQL connected successfully");
 
-    await resetDatabase();
-    console.log("Database reset");
+    // await resetDatabase();
+    // console.log("Database reset");
 
     await sequelize.sync({ force: false, alter: false });
     console.log("Models synced");
 
-    await runSeeds();
-    console.log("Seed data inserted");
+    // await runSeeds();
+    // console.log("Seed data inserted");
 
     app.listen(PORT, () => {
       console.log(`Server running on port http://localhost:${PORT}`);
