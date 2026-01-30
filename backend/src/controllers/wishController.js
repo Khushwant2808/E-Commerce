@@ -24,8 +24,18 @@ async function addToWishList(req, res, next) {
       wish
     });
   } catch (error) {
+    // Log error in terminal for debugging
+    console.error("Wishlist Error:", error.message);
+
     if (error instanceof Sequelize.UniqueConstraintError) {
       return res.status(409).json({ message: "Item already in wishlist" });
+    }
+
+    if (error instanceof Sequelize.ForeignKeyConstraintError) {
+      console.error("Foreign key constraint error - User may not exist");
+      return res.status(400).json({
+        message: "Unable to add item to wishlist. Please try logging in again."
+      });
     }
 
     next(error);
@@ -35,17 +45,27 @@ async function addToWishList(req, res, next) {
 async function getWishlist(req, res, next) {
   try {
     const userId = req.user.id;
+    console.log('[Wishlist] Fetching wishlist for user:', userId);
 
     const wishlist = await Wishlist.findAll({
-      where: { userId }
+      where: { userId },
+      include: [
+        {
+          association: 'Product',
+          attributes: ['id', 'name', 'price', 'imageUrl', 'stock', 'isActive']
+        }
+      ]
     });
 
-    if (!wishlist.length) {
-      return res.status(404).json({ message: "Wishlist is empty" });
-    }
+    console.log('[Wishlist] Found', wishlist.length, 'items');
 
-    return res.status(200).json(wishlist);
+    // Return empty array instead of 404 when wishlist is empty
+    return res.status(200).json({
+      items: wishlist,
+      count: wishlist.length
+    });
   } catch (error) {
+    console.error('[Wishlist] Error fetching wishlist:', error.message);
     next(error);
   }
 }

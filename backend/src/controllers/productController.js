@@ -50,7 +50,7 @@ async function getProducts(req, res, next) {
 
     const offset = (page - 1) * limit;
     const { search, minPrice, maxPrice, category } = req.query;
-    const where = {};
+    const where = { isActive: true }; // Only show active products to users
 
     if (search) {
       where.name = { [Op.iLike]: `%${search}%` };
@@ -62,6 +62,8 @@ async function getProducts(req, res, next) {
       if (maxPrice) where.price[Op.lte] = parseFloat(maxPrice);
     }
 
+    console.log('[Products] Search query:', { search, minPrice, maxPrice, page, limit });
+
     const { count, rows } = await Product.findAndCountAll({
       where,
       limit,
@@ -69,10 +71,9 @@ async function getProducts(req, res, next) {
       order: [["createdAt", "DESC"]]
     });
 
-    if (!rows.length) {
-      return res.status(404).json({ message: "No products found" });
-    }
+    console.log('[Products] Found', count, 'products');
 
+    // Return empty array instead of 404 for better UX
     return res.status(200).json({
       totalItems: count,
       totalPages: Math.ceil(count / limit),
@@ -80,6 +81,40 @@ async function getProducts(req, res, next) {
       products: rows
     });
   } catch (error) {
+    console.error('[Products] Error fetching products:', error.message);
+    next(error);
+  }
+}
+
+async function getProductById(req, res, next) {
+  try {
+    const { id } = req.params;
+    console.log('[Products] Fetching product by ID:', id);
+
+    const product = await Product.findOne({
+      where: { id },
+      include: [
+        {
+          association: 'User',
+          attributes: ['id', 'name']
+        }
+      ]
+    });
+
+    if (!product) {
+      console.log('[Products] Product not found:', id);
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (!product.isActive) {
+      console.log('[Products] Product is inactive:', id);
+      return res.status(404).json({ message: "Product not available" });
+    }
+
+    console.log('[Products] Product fetched successfully:', product.name);
+    return res.status(200).json(product);
+  } catch (error) {
+    console.error('[Products] Error fetching product:', error.message);
     next(error);
   }
 }

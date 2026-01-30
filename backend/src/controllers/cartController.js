@@ -88,8 +88,18 @@ async function updateItemInCart(req, res, next) {
       });
     }
   } catch (error) {
+    // Log error in terminal for debugging
+    console.error("Cart Error:", error.message);
+
     if (error instanceof Sequelize.UniqueConstraintError) {
       return res.status(409).json({ message: "Item already exists in cart" });
+    }
+
+    if (error instanceof Sequelize.ForeignKeyConstraintError) {
+      console.error("Foreign key constraint error - User may not exist");
+      return res.status(400).json({
+        message: "Unable to add item to cart. Please try logging in again."
+      });
     }
 
     next(error);
@@ -99,25 +109,29 @@ async function updateItemInCart(req, res, next) {
 async function getCartItems(req, res, next) {
   try {
     const userId = req.user.id;
+    console.log('[Cart] Fetching cart for user:', userId);
 
     const cart = await Cart.findOne({ where: { userId } });
     if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
+      console.log('[Cart] No cart found, returning empty');
+      return res.status(200).json([]);
     }
 
     const cartItems = await CartItem.findAll({
-      where: { cartId: cart.id }
+      where: { cartId: cart.id },
+      include: [
+        {
+          association: 'Product',
+          attributes: ['id', 'name', 'price', 'imageUrl', 'stock', 'isActive']
+        }
+      ]
     });
 
-    if (!cartItems.length) {
-      return res.status(200).json({
-        message: "Cart is empty",
-        items: []
-      });
-    }
+    console.log('[Cart] Found', cartItems.length, 'items');
 
     return res.status(200).json(cartItems);
   } catch (error) {
+    console.error('[Cart] Error fetching cart:', error.message);
     next(error);
   }
 }
