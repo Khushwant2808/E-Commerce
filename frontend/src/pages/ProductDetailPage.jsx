@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Star, StarHalf, Heart, ShoppingCart, Package, Shield, TruckIcon } from 'lucide-react';
-import { productAPI, reviewAPI } from '../services/api';
+import { productAPI, reviewAPI, wishlistAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -13,6 +13,8 @@ const ProductDetailPage = () => {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
+    const [isWishlisted, setIsWishlisted] = useState(false);
+    const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
     const { addToCart } = useCart();
     const { isAuthenticated } = useAuth();
 
@@ -20,6 +22,12 @@ const ProductDetailPage = () => {
         fetchProduct();
         fetchReviews();
     }, [id]);
+
+    useEffect(() => {
+        if (isAuthenticated && id) {
+            checkWishlistStatus();
+        }
+    }, [isAuthenticated, id]);
 
     const fetchProduct = async () => {
         try {
@@ -39,6 +47,43 @@ const ProductDetailPage = () => {
             setReviews(data.reviews || []);
         } catch (error) {
             console.error('Failed to fetch reviews:', error);
+        }
+    };
+
+    const checkWishlistStatus = async () => {
+        try {
+            const { data } = await wishlistAPI.get();
+            const ids = (data.items || []).map(item => Number(item.productId));
+            setIsWishlisted(ids.includes(Number(id)));
+        } catch (error) {
+            console.error('Failed to check wishlist:', error);
+        }
+    };
+
+    const toggleWishlist = async () => {
+        if (!isAuthenticated) {
+            toast.error('Please login to add to wishlist');
+            return;
+        }
+
+        if (isTogglingWishlist) return;
+
+        setIsTogglingWishlist(true);
+        try {
+            if (isWishlisted) {
+                await wishlistAPI.remove(id);
+                setIsWishlisted(false);
+                toast.success('Removed from wishlist');
+            } else {
+                await wishlistAPI.toggle({ productId: id });
+                setIsWishlisted(true);
+                toast.success('Added to wishlist');
+            }
+        } catch (error) {
+            console.error('Wishlist toggle error:', error);
+            toast.error('Failed to update wishlist');
+        } finally {
+            setIsTogglingWishlist(false);
         }
     };
 
@@ -153,28 +198,43 @@ const ProductDetailPage = () => {
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        className="w-10 h-10 flex items-center justify-center glass rounded-lg hover:bg-white/10"
+                                        disabled={product.stock === 0}
+                                        className="w-10 h-10 flex items-center justify-center glass rounded-lg hover:bg-white/10 disabled:opacity-50"
                                     >
                                         -
                                     </button>
                                     <span className="w-12 text-center font-semibold">{quantity}</span>
                                     <button
-                                        onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                                        className="w-10 h-10 flex items-center justify-center glass rounded-lg hover:bg-white/10"
+                                        onClick={() => setQuantity(Math.min(product.stock || 1, quantity + 1))}
+                                        disabled={product.stock === 0}
+                                        className="w-10 h-10 flex items-center justify-center glass rounded-lg hover:bg-white/10 disabled:opacity-50"
                                     >
                                         +
                                     </button>
                                 </div>
                             </div>
 
-                            <button
-                                onClick={handleAddToCart}
-                                disabled={product.stock === 0}
-                                className="w-full btn-primary text-lg flex items-center justify-center space-x-2"
-                            >
-                                <ShoppingCart className="w-6 h-6" />
-                                <span>Add to Cart</span>
-                            </button>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={product.stock === 0}
+                                    className="flex-1 btn-primary text-lg flex items-center justify-center space-x-2"
+                                >
+                                    <ShoppingCart className="w-6 h-6" />
+                                    <span>{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
+                                </button>
+
+                                <button
+                                    onClick={toggleWishlist}
+                                    disabled={isTogglingWishlist}
+                                    className={`w-14 h-14 flex items-center justify-center rounded-xl transition-all duration-300 ${isWishlisted
+                                            ? 'bg-red-500 text-white'
+                                            : 'glass hover:bg-white/10'
+                                        } ${isTogglingWishlist ? 'opacity-50' : ''}`}
+                                >
+                                    <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-white' : ''}`} />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-3 gap-4">
@@ -229,8 +289,8 @@ const ProductDetailPage = () => {
                         </div>
                     )}
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 
