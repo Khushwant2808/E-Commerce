@@ -7,13 +7,15 @@ const {
   cancelOrder,
   getMyOrders,
   updateOrderStatus,
-  updateOrderItemStatus
+  updateOrderItemStatus,
+  getSellerOrders
 } = require("../controllers/orderController");
 
 const { authenticateToken } = require("../middlewares/authMiddleware");
 const { verifyIfSeller } = require("../middlewares/productMiddleware");
 
 router.post("/", authenticateToken, placeOrder);
+router.get("/seller", authenticateToken, verifyIfSeller, getSellerOrders);
 router.get("/", authenticateToken, getMyOrders);
 
 router.put("/items/:itemId/status", authenticateToken, verifyIfSeller, updateOrderItemStatus);

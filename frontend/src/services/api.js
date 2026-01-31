@@ -235,6 +235,12 @@ export const orderAPI = {
         console.log('[Orders] Updating item status:', itemId, 'to', status);
         return api.put(`/orders/items/${itemId}/status`, { status });
     },
+
+    // GET /api/orders/seller (get orders containing seller's products)
+    getSellerOrders: () => {
+        console.log('[Orders] Fetching seller orders');
+        return api.get('/orders/seller');
+    },
 };
 
 // ==========================================

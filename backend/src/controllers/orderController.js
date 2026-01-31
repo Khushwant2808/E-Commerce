@@ -36,6 +36,79 @@ async function getMyOrders(req, res, next) {
   }
 }
 
+async function getSellerOrders(req, res, next) {
+  try {
+    const sellerId = req.user.id;
+    console.log('[Orders] Fetching orders for seller:', sellerId);
+
+    // 1. Get all products associated with this seller
+    const products = await Product.findAll({
+      where: { userId: sellerId },
+      attributes: ['id']
+    });
+
+    const productIds = products.map(p => p.id);
+
+    if (productIds.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    const { Op } = require("sequelize");
+
+    // 2. Find orders containing these products
+    const orders = await Order.findAll({
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: OrderItem,
+          as: "orderItems",
+          required: true, // Only returns orders that HAVE these items
+          where: {
+            productId: {
+              [Op.in]: productIds
+            }
+          },
+          include: [
+            {
+              model: Product,
+              attributes: ['id', 'name', 'price', 'imageUrl']
+            }
+          ]
+        },
+        {
+          model: User, // Buyer
+          attributes: ['id', 'name', 'email']
+        },
+        {
+          model: Address
+        }
+      ]
+    });
+
+    // 3. Calculate revenue for the seller per order
+    const sellerOrders = orders.map(order => {
+      const orderJson = order.toJSON();
+
+      // Calculate total only for items sold by this seller
+      const sellerTotal = orderJson.orderItems.reduce((sum, item) => {
+        return sum + (item.price * item.quantity);
+      }, 0);
+
+      return {
+        ...orderJson,
+        totalAmount: sellerTotal // Override totalAmount with seller's revenue
+      };
+    });
+
+    console.log('[Orders] Found', sellerOrders.length, 'orders for seller:', sellerId);
+
+    return res.status(200).json(sellerOrders);
+  } catch (error) {
+    console.error('[Orders] Error fetching seller orders:', error.message);
+    next(error);
+  }
+}
+
 async function placeOrder(req, res, next) {
   const transaction = await sequelize.transaction();
 
@@ -259,5 +332,6 @@ module.exports = {
   cancelOrder,
   getMyOrders,
   updateOrderStatus,
-  updateOrderItemStatus
+  updateOrderItemStatus,
+  getSellerOrders
 };

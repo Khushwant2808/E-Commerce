@@ -12,7 +12,7 @@ const SellerOrders = () => {
 
     const fetchOrders = async () => {
         try {
-            const { data } = await orderAPI.getAll();
+            const { data } = await orderAPI.getSellerOrders();
             setOrders(data || []);
         } catch (error) {
             toast.error('Failed to fetch orders');
@@ -44,12 +44,28 @@ const SellerOrders = () => {
                     <div key={order.id} className="glass-card">
                         <div className="flex justify-between items-start mb-4">
                             <div>
-                                <p className="font-semibold">Order #{order.id}</p>
-                                <p className="text-sm text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</p>
+                                <p className="font-semibold text-lg">Order #{order.id}</p>
+                                <p className="text-sm text-gray-400">
+                                    {new Date(order.createdAt).toLocaleDateString()}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Buyer: {order.User?.name || order.User?.email || 'Unknown'}
+                                </p>
                             </div>
-                            <span className="badge-info">{order.status}</span>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${order.status === 'delivered' ? 'bg-green-500/20 text-green-400' :
+                                    order.status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
+                                        'bg-yellow-500/20 text-yellow-400'
+                                }`}>
+                                {order.status?.toUpperCase()}
+                            </span>
                         </div>
-                        <p className="text-2xl font-bold gradient-text">${parseFloat(order.totalAmount).toFixed(2)}</p>
+                        <div className="flex justify-between items-end">
+                            <p className="text-gray-400 text-sm">{order.orderItems?.length} items</p>
+                            <div>
+                                <p className="text-xs text-gray-400 text-right">Your Revenue</p>
+                                <p className="text-2xl font-bold gradient-text">${parseFloat(order.totalAmount).toFixed(2)}</p>
+                            </div>
+                        </div>
                     </div>
                 ))}
             </div>

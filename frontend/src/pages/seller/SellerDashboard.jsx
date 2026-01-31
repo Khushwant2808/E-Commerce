@@ -20,7 +20,7 @@ const SellerDashboard = () => {
         try {
             const [productsRes, ordersRes] = await Promise.all([
                 productAPI.getMyProducts(),
-                orderAPI.getAll(),
+                orderAPI.getSellerOrders(),
             ]);
 
             const products = productsRes.data || [];
@@ -30,7 +30,9 @@ const SellerDashboard = () => {
                 totalProducts: products.length,
                 activeProducts: products.filter(p => p.isActive).length,
                 totalOrders: orders.length,
-                totalRevenue: orders.reduce((sum, order) => sum + parseFloat(order.totalAmount || 0), 0),
+                totalRevenue: orders
+                    .filter(order => order.paymentStatus === 'paid')
+                    .reduce((sum, order) => sum + parseFloat(order.totalAmount || 0), 0),
             });
         } catch (error) {
             console.error('Failed to fetch stats:', error);
