@@ -18,6 +18,7 @@ app.use("/api/address", require("./routes/addressRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/review", require("./routes/reviewRoutes"));
 app.use("/api/payments", require("./routes/paymentRoutes"));
+app.use("/api/contact", require("./routes/contactRoutes"));
 
 app.get("/", (req, res) => {
   res.send("E-commerce API is running");

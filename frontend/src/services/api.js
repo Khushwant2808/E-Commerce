@@ -139,6 +139,23 @@ export const productAPI = {
 };
 
 // ==========================================
+// CONTACT APIS
+// ==========================================
+export const contactAPI = {
+    // POST /api/contact
+    submit: (data) => {
+        console.log('[Contact] Submitting contact form');
+        return api.post('/contact', data);
+    },
+
+    // GET /api/contact/my
+    getMyMessages: () => {
+        console.log('[Contact] Fetching user\'s contact messages');
+        return api.get('/contact/my');
+    },
+};
+
+// ==========================================
 // CART APIS
 // ==========================================
 export const cartAPI = {

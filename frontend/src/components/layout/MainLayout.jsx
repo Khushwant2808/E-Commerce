@@ -35,8 +35,8 @@ const MainLayout = () => {
                             <h4 className="font-semibold mb-4">About</h4>
                             <ul className="space-y-2 text-sm text-gray-400">
                                 <li><Link to="/about" className="hover:text-white transition-colors">Our Story</Link></li>
-                                <li><Link to="#" className="hover:text-white transition-colors">Contact Us</Link></li>
-                                <li><Link to="#" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
+                                <li><Link to="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
+                                <li><Link to="/terms" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
                             </ul>
                         </div>
                     </div>
