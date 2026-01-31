@@ -107,8 +107,13 @@ async function getProductById(req, res, next) {
     }
 
     if (!product.isActive) {
-      console.log('[Products] Product is inactive:', id);
-      return res.status(404).json({ message: "Product not available" });
+      // Check if user is the owner or admin
+      const isOwner = req.user && (req.user.id === product.userId || req.user.role === 'admin');
+
+      if (!isOwner) {
+        console.log('[Products] Product is inactive:', id);
+        return res.status(404).json({ message: "Product not available" });
+      }
     }
 
     console.log('[Products] Product fetched successfully:', product.name);

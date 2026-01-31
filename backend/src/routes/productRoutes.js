@@ -2,13 +2,13 @@ const express = require("express");
 const router = express.Router();
 
 const { getProducts, getProductById, updateStock, updateProductMeta, addProduct, showProducts, deleteProduct } = require("../controllers/productController");
-const { authenticateToken } = require("../middlewares/authMiddleware");
+const { authenticateToken, optionalAuthenticateToken } = require("../middlewares/authMiddleware");
 const { verifyIfSeller } = require("../middlewares/productMiddleware");
 
 // Public routes
 router.get("/", getProducts);
 router.get("/show", authenticateToken, verifyIfSeller, showProducts);
-router.get("/:id", getProductById); // Must be after /show to not match "show" as :id
+router.get("/:id", optionalAuthenticateToken, getProductById); // Must be after /show to not match "show" as :id
 
 // Seller-only routes
 router.post("/", authenticateToken, verifyIfSeller, addProduct);
