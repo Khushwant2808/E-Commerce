@@ -5,12 +5,10 @@ const { getProducts, getProductById, updateStock, updateProductMeta, addProduct,
 const { authenticateToken, optionalAuthenticateToken } = require("../middlewares/authMiddleware");
 const { verifyIfSeller } = require("../middlewares/productMiddleware");
 
-// Public routes
 router.get("/", getProducts);
 router.get("/show", authenticateToken, verifyIfSeller, showProducts);
 router.get("/:id", optionalAuthenticateToken, getProductById); // Must be after /show to not match "show" as :id
 
-// Seller-only routes
 router.post("/", authenticateToken, verifyIfSeller, addProduct);
 router.put("/stock", authenticateToken, verifyIfSeller, updateStock);
 router.put("/meta", authenticateToken, verifyIfSeller, updateProductMeta);

@@ -24,7 +24,6 @@ async function addToWishList(req, res, next) {
       wish
     });
   } catch (error) {
-    // Log error in terminal for debugging
     console.error("Wishlist Error:", error.message);
 
     if (error instanceof Sequelize.UniqueConstraintError) {
@@ -45,7 +44,6 @@ async function addToWishList(req, res, next) {
 async function getWishlist(req, res, next) {
   try {
     const userId = req.user.id;
-    console.log('[Wishlist] Fetching wishlist for user:', userId);
 
     const wishlist = await Wishlist.findAll({
       where: { userId },
@@ -57,15 +55,11 @@ async function getWishlist(req, res, next) {
       ]
     });
 
-    console.log('[Wishlist] Found', wishlist.length, 'items');
-
-    // Return empty array instead of 404 when wishlist is empty
     return res.status(200).json({
       items: wishlist,
       count: wishlist.length
     });
   } catch (error) {
-    console.error('[Wishlist] Error fetching wishlist:', error.message);
     next(error);
   }
 }
@@ -84,7 +78,6 @@ async function removeFromWishlist(req, res, next) {
     });
 
     if (!deleted) {
-      // Check if it exists to give better error
       const exists = await Wishlist.findOne({ where: { userId, productId } });
       if (!exists) {
         return res.status(404).json({ message: 'Item not in wishlist' });
@@ -96,7 +89,6 @@ async function removeFromWishlist(req, res, next) {
     }
     return res.status(200).json({ message: 'Removed from wishlist' });
   } catch (error) {
-    console.error('[Wishlist] Delete Error:', error.message);
     next(error);
   }
 }

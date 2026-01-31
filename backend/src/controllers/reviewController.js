@@ -110,7 +110,6 @@ async function getProductRating(req, res, next) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // Get all reviews with user names
     const reviews = await Review.findAll({
       where: { productId },
       include: [

@@ -196,8 +196,8 @@ const EditProductPage = () => {
                             <div
                                 onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
                                 className={`cursor-pointer p-4 rounded-xl border transition-all duration-300 ${formData.isActive
-                                        ? 'bg-green-500/10 border-green-500/50'
-                                        : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                    ? 'bg-green-500/10 border-green-500/50'
+                                    : 'bg-white/5 border-white/10 hover:bg-white/10'
                                     }`}
                             >
                                 <div className="flex items-center justify-between mb-2">
@@ -219,8 +219,8 @@ const EditProductPage = () => {
                             <div
                                 onClick={() => setFormData({ ...formData, isFeatured: !formData.isFeatured })}
                                 className={`cursor-pointer p-4 rounded-xl border transition-all duration-300 ${formData.isFeatured
-                                        ? 'bg-amber-500/10 border-amber-500/50'
-                                        : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                    ? 'bg-amber-500/10 border-amber-500/50'
+                                    : 'bg-white/5 border-white/10 hover:bg-white/10'
                                     }`}
                             >
                                 <div className="flex items-center justify-between mb-2">

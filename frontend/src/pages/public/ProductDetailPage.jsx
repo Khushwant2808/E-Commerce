@@ -13,14 +13,9 @@ const ProductDetailPage = () => {
     const [activeImage, setActiveImage] = useState(0);
 
     useEffect(() => {
-        // Mock fetch if real API fails or for demo
         const fetchProduct = async () => {
             try {
                 setLoading(true);
-                // Simulate API call
-                // const data = await ProductService.getOne(id);
-
-                // Mock Data since backend might be empty
                 const mockData = {
                     id: parseInt(id),
                     name: "Minimalist Leather Tote",
@@ -30,9 +25,9 @@ const ProductDetailPage = () => {
                     reviews: 124,
                     stock: 5,
                     images: [
-                        "", // Placeholder
-                        "", // Placeholder
-                        ""  // Placeholder
+                        "",
+                        "",
+                        ""
                     ]
                 };
                 setProduct(mockData);
@@ -55,7 +50,6 @@ const ProductDetailPage = () => {
             </Link>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                {/* Images */}
                 <div className="space-y-4">
                     <div className="aspect-square bg-neutral-800 rounded-2xl overflow-hidden relative">
                         <div className="absolute inset-0 flex items-center justify-center text-neutral-600">
@@ -74,7 +68,6 @@ const ProductDetailPage = () => {
                     </div>
                 </div>
 
-                {/* Details */}
                 <div className="flex flex-col justify-center">
                     <div className="mb-6">
                         <h1 className="text-4xl font-bold text-white mb-2">{product.name}</h1>

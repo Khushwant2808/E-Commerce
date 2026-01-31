@@ -26,7 +26,6 @@ export const CartProvider = ({ children }) => {
             const { data } = await cartAPI.get();
             setCart(data || []);
         } catch (error) {
-            // Silent fail for cart fetch - don't show error to user
             console.error('Failed to fetch cart:', error);
             setCart([]);
         } finally {
@@ -96,9 +95,6 @@ export const CartProvider = ({ children }) => {
     };
 
     const clearCart = async () => {
-        // Implementation might need to change if we want a clear endpoint, 
-        // but looping remove is fine for now provided it waits.
-        // Parallelizing requests might be better.
         try {
             await Promise.all(cart.map(item => cartAPI.remove({ productId: item.productId })));
             setCart([]);

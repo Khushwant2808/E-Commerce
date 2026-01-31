@@ -33,12 +33,8 @@ async function register(req, res, next) {
       password: hashedPassword,
     });
 
-    console.log('[Auth] User registered:', user.email, 'ID:', user.id);
-
-    // Reload user to get default values (role, canSell) from DB
     await user.reload();
 
-    // Generate JWT token for immediate login
     const token = jwt.sign(
       {
         id: user.id,
@@ -60,7 +56,7 @@ async function register(req, res, next) {
         email: user.email,
         role: user.role,
         canSell: user.canSell,
-        phone: null // New user has no phone yet
+        phone: null
       }
     });
   } catch (error) {
@@ -109,8 +105,6 @@ async function login(req, res, next) {
       { expiresIn: "24h" }
     );
 
-    console.log('[Auth] User logged in:', user.email, 'ID:', user.id);
-
     return res.status(200).json({
       message: "Login successful",
       token,
@@ -127,7 +121,6 @@ async function login(req, res, next) {
     if (error instanceof Sequelize.DatabaseError) {
       return res.status(500).json({ message: "Database error" });
     }
-
     next(error);
   }
 }
@@ -241,10 +234,140 @@ async function becomeSeller(req, res, next) {
   }
 }
 
+async function getAllUsers(req, res, next) {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    const users = await User.findAll({
+      include: [{ model: PhoneNumber, as: 'PhoneNumber' }],
+      order: [['createdAt', 'DESC']]
+    });
+
+    return res.status(200).json({
+      users: users.map(user => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        canSell: user.canSell,
+        phone: user.PhoneNumber?.phone,
+        createdAt: user.createdAt
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function updateUserRole(req, res, next) {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    const { userId } = req.params;
+    const { role } = req.body;
+
+    if (!['user', 'admin'].includes(role)) {
+      return res.status(400).json({ message: "Invalid role. Must be 'user' or 'admin'" });
+    }
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.id === req.user.id && role !== 'admin') {
+      return res.status(400).json({ message: "Cannot remove your own admin role" });
+    }
+
+    user.role = role;
+    await user.save();
+
+    return res.status(200).json({
+      message: `User role updated to ${role}`,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        canSell: user.canSell
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function toggleUserSeller(req, res, next) {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    const { userId } = req.params;
+    const { canSell } = req.body;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.canSell = canSell;
+    await user.save();
+
+    return res.status(200).json({
+      message: `Seller status ${canSell ? 'enabled' : 'disabled'}`,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        canSell: user.canSell
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function deleteUser(req, res, next) {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    const { userId } = req.params;
+
+    if (parseInt(userId) === req.user.id) {
+      return res.status(400).json({ message: "Cannot delete your own account" });
+    }
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    await user.destroy();
+
+    return res.status(200).json({
+      message: "User deleted successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   register,
   login,
   verifyToken,
   updateProfile,
-  becomeSeller
+  becomeSeller,
+  getAllUsers,
+  updateUserRole,
+  toggleUserSeller,
+  deleteUser
 };

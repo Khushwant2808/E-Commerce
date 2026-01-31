@@ -46,12 +46,9 @@ async function addToCart(req, res, next) {
     });
 
     if (!created) {
-      // Check total quantity after addition
       const newQuantity = cartItem.quantity + quantity;
 
       if (newQuantity > product.stock) {
-        // Option: Cap at max stock or throw error? 
-        // Current logic: Cap at max stock.
         cartItem.quantity = product.stock;
         await cartItem.save();
         return res.status(200).json({

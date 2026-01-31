@@ -8,13 +8,21 @@ import { useCart } from '../../context/CartContext';
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
     const userMenuRef = useRef(null);
     const { isAuthenticated, user, logout, isSeller, isAdmin } = useAuth();
     const { totalItems } = useCart();
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Close dropdown on click outside
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
@@ -25,7 +33,6 @@ const Navbar = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Close menus on route change
     useEffect(() => {
         setIsOpen(false);
         setShowUserMenu(false);
@@ -40,10 +47,12 @@ const Navbar = () => {
     const isActive = (path) => location.pathname === path;
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5">
+        <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${scrolled
+            ? 'bg-white/5 backdrop-blur-2xl border-b border-white/10 shadow-xl shadow-black/30'
+            : 'bg-white/[0.02] backdrop-blur-xl border-b border-white/5'
+            }`}>
             <div className="section-container">
                 <div className="flex items-center justify-between h-16">
-                    {/* Logo */}
                     <Link to="/" className="flex items-center space-x-3 group">
                         <motion.div
                             whileHover={{ rotate: 12, scale: 1.1 }}
@@ -58,7 +67,6 @@ const Navbar = () => {
                         </span>
                     </Link>
 
-                    {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center space-x-1 bg-white/5 rounded-full p-1">
                         <NavLink to="/" active={isActive('/')}>Home</NavLink>
                         <NavLink to="/products" active={isActive('/products')}>Products</NavLink>
@@ -71,9 +79,7 @@ const Navbar = () => {
                         <NavLink to="/about" active={isActive('/about')}>About</NavLink>
                     </div>
 
-                    {/* Right Actions */}
                     <div className="flex items-center space-x-2">
-                        {/* Cart */}
                         <Link to="/cart" className="relative p-2.5 hover:bg-white/10 rounded-xl transition-all duration-300 group">
                             <ShoppingCart className="w-5 h-5 text-gray-300 group-hover:text-white transition-colors" />
                             <AnimatePresence>
@@ -90,7 +96,6 @@ const Navbar = () => {
                             </AnimatePresence>
                         </Link>
 
-                        {/* User Menu */}
                         {isAuthenticated ? (
                             <div className="relative" ref={userMenuRef}>
                                 <button
@@ -111,17 +116,14 @@ const Navbar = () => {
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                             transition={{ duration: 0.2, ease: "easeOut" }}
-                                            className="absolute right-0 mt-2 w-64 glass rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
+                                            className="absolute right-0 mt-2 w-64 bg-[#0f0f0f] rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
                                         >
-                                            {/* User Info */}
                                             <div className="p-4 border-b border-white/10 bg-white/5">
                                                 <p className="font-semibold text-white">{user?.name}</p>
                                                 <p className="text-sm text-gray-400 truncate">{user?.email}</p>
                                             </div>
 
-                                            {/* Menu Items */}
                                             <div className="p-2">
-                                                {/* Dashboard Link for Sellers/Admins */}
                                                 {(isSeller || isAdmin) && (
                                                     <MenuItem
                                                         to={isAdmin ? "/admin" : "/seller"}
@@ -168,7 +170,6 @@ const Navbar = () => {
                             </div>
                         )}
 
-                        {/* Mobile Menu Toggle */}
                         <button
                             onClick={() => setIsOpen(!isOpen)}
                             className="md:hidden p-2.5 hover:bg-white/10 rounded-xl transition-all"
@@ -188,7 +189,6 @@ const Navbar = () => {
                     </div>
                 </div>
 
-                {/* Mobile Menu */}
                 <AnimatePresence>
                     {isOpen && (
                         <motion.div
@@ -226,14 +226,12 @@ const Navbar = () => {
     );
 };
 
-// ===== SUB-COMPONENTS =====
-
 const NavLink = ({ to, children, active }) => (
     <Link
         to={to}
         className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${active
-                ? 'bg-white/10 text-white'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            ? 'bg-white/10 text-white'
+            : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
     >
         {children}
@@ -245,8 +243,8 @@ const MenuItem = ({ to, icon: Icon, children, onClick, highlight }) => (
         to={to}
         onClick={onClick}
         className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${highlight
-                ? 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30'
-                : 'text-gray-300 hover:bg-white/10 hover:text-white'
+            ? 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30'
+            : 'text-gray-300 hover:bg-white/10 hover:text-white'
             }`}
     >
         <Icon className="w-4 h-4" />
@@ -259,10 +257,10 @@ const MobileNavLink = ({ to, children, onClick, active, highlight }) => (
         to={to}
         onClick={onClick}
         className={`block px-4 py-3 rounded-xl transition-all duration-200 ${highlight
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : active
-                    ? 'bg-white/10 text-white font-medium'
-                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
+            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+            : active
+                ? 'bg-white/10 text-white font-medium'
+                : 'text-gray-400 hover:bg-white/5 hover:text-white'
             }`}
     >
         {children}

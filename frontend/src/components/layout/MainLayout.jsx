@@ -8,7 +8,7 @@ const MainLayout = () => {
             <main className="pt-16">
                 <Outlet />
             </main>
-            <footer className="glass border-t border-white/10 mt-20">
+            <footer className="glass border-t border-white/10">
                 <div className="section-container py-12">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                         <div>

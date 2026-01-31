@@ -22,7 +22,6 @@ const ProductListingPage = () => {
             setProducts(data);
         } catch (error) {
             console.error("Error fetching products", error);
-            // Fallback/Mock data for demo if backend is empty
             setProducts([
                 { id: 1, name: "Minimalist Watch", price: 199.99, rating: 4.8, imageUrl: "" },
                 { id: 2, name: "Leather Tote", price: 249.50, rating: 4.5, imageUrl: "" },
@@ -39,12 +38,11 @@ const ProductListingPage = () => {
     ).sort((a, b) => {
         if (sortBy === 'price-low') return a.price - b.price;
         if (sortBy === 'price-high') return b.price - a.price;
-        return 0; // Default
+        return 0;
     });
 
     return (
         <div className="max-w-7xl mx-auto">
-            {/* Header & Controls */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <h1 className="text-3xl font-bold text-white">Shop Collection</h1>
 
@@ -75,7 +73,6 @@ const ProductListingPage = () => {
                 </div>
             </div>
 
-            {/* Grid */}
             {loading ? (
                 <div className="text-white text-center py-20">Loading products...</div>
             ) : (

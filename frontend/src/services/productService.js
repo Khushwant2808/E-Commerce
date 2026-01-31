@@ -11,7 +11,6 @@ export const ProductService = {
         return data;
     },
 
-    // Seller Methods
     create: async (productData) => {
         const { data } = await api.post('/products', productData);
         return data;

@@ -72,19 +72,16 @@ const HomePage = () => {
 
     return (
         <div className="overflow-hidden">
-            {/* ===== HERO SECTION ===== */}
             <motion.section
                 style={{ opacity: heroOpacity, scale: heroScale }}
                 className="relative min-h-screen flex items-center justify-center overflow-hidden"
             >
-                {/* Animated Background */}
                 <div className="absolute inset-0 pointer-events-none">
                     <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] animate-float" />
                     <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] animate-float-delayed" />
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[150px]" />
                 </div>
 
-                {/* Grid Pattern */}
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none" />
 
                 <div className="section-container relative z-10">
@@ -94,7 +91,6 @@ const HomePage = () => {
                         animate="visible"
                         className="text-center max-w-5xl mx-auto"
                     >
-                        {/* Badge */}
                         <motion.div variants={itemVariants} className="mb-8">
                             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-purple-500/30 text-sm font-medium text-purple-300">
                                 <Sparkles className="w-4 h-4" />
@@ -102,7 +98,6 @@ const HomePage = () => {
                             </span>
                         </motion.div>
 
-                        {/* Main Heading */}
                         <motion.h1
                             variants={itemVariants}
                             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-8 leading-[1.1] tracking-tight"
@@ -112,7 +107,6 @@ const HomePage = () => {
                             <span className="gradient-text">Premium</span> Products
                         </motion.h1>
 
-                        {/* Subtitle */}
                         <motion.p
                             variants={itemVariants}
                             className="text-lg sm:text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed"
@@ -120,7 +114,6 @@ const HomePage = () => {
                             Experience luxury shopping with curated collections, seamless checkout, and lightning-fast delivery. Your perfect purchase awaits.
                         </motion.p>
 
-                        {/* CTA Buttons */}
                         <motion.div
                             variants={itemVariants}
                             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
@@ -135,7 +128,6 @@ const HomePage = () => {
                             </Link>
                         </motion.div>
 
-                        {/* Stats */}
                         <motion.div
                             variants={itemVariants}
                             className="mt-20 grid grid-cols-3 gap-8 max-w-2xl mx-auto"
@@ -147,7 +139,6 @@ const HomePage = () => {
                     </motion.div>
                 </div>
 
-                {/* Scroll Indicator */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -164,8 +155,7 @@ const HomePage = () => {
                 </motion.div>
             </motion.section>
 
-            {/* ===== FEATURES SECTION ===== */}
-            <section className="py-32 relative">
+            <section className="py-20 relative">
                 <div className="section-container">
                     <motion.div
                         initial={{ opacity: 0, y: 40 }}
@@ -196,7 +186,6 @@ const HomePage = () => {
                 </div>
             </section>
 
-            {/* ===== FEATURED PRODUCTS ===== */}
             <section className="py-20 relative">
                 <div className="section-container">
                     <motion.div
@@ -205,7 +194,6 @@ const HomePage = () => {
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.8 }}
                     >
-                        {/* Section Header */}
                         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
                             <div>
                                 <span className="text-purple-400 font-medium mb-2 block">CURATED FOR YOU</span>
@@ -217,7 +205,6 @@ const HomePage = () => {
                             </Link>
                         </div>
 
-                        {/* Products Grid */}
                         {loading ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                                 {[...Array(8)].map((_, i) => (
@@ -251,8 +238,7 @@ const HomePage = () => {
                 </div>
             </section>
 
-            {/* ===== WHY CHOOSE US ===== */}
-            <section className="py-32 relative overflow-hidden">
+            <section className="py-20 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent pointer-events-none" />
 
                 <div className="section-container relative z-10">
@@ -278,7 +264,6 @@ const HomePage = () => {
                 </div>
             </section>
 
-            {/* ===== CTA SECTION (Only for non-sellers) ===== */}
             {!isSeller && (
                 <section className="py-20">
                     <div className="section-container">
@@ -309,8 +294,6 @@ const HomePage = () => {
         </div>
     );
 };
-
-// ===== SUB-COMPONENTS =====
 
 const StatItem = ({ value, label }) => (
     <div className="text-center">

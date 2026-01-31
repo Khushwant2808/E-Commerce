@@ -1,278 +1,93 @@
-# LuxeCommerce - Premium E-Commerce Platform
+# LuxeCommerce - Full-Stack E-Commerce Platform
 
-A stunning, modern e-commerce platform built with React, Vite, and Tailwind CSS featuring a premium dark-mode UI with glassmorphism effects and smooth animations.
+A modern, full-featured e-commerce platform built with React and Node.js featuring a premium glassmorphism UI design, real-time order management, and comprehensive admin dashboard.
 
-## ✨ Features
+## Tech Stack
 
-### 🎨 Design
-- **Premium Dark Mode UI** with glassmorphism effects
-- **Advanced Animations** powered by Framer Motion
-- **Responsive Design** optimized for all devices
-- **Gradient Accents** for a modern, luxury feel
-- **Custom Scrollbars** and micro-interactions
+### Frontend
+- React 18 with Vite
+- TailwindCSS for styling
+- Framer Motion for animations
+- React Router for navigation
+- Axios for API communication
 
-### 🛍️ Shopping Features
-- Browse products with search and filters
-- Product details with reviews and ratings
-- Shopping cart with real-time updates
+### Backend
+- Node.js with Express.js
+- PostgreSQL database
+- Sequelize ORM
+- JWT authentication
+- bcrypt for password hashing
+
+## Features
+
+### Customer Features
+- User registration and authentication
+- Product browsing with search and filters
+- Shopping cart management
 - Wishlist functionality
-- Secure checkout process
-- Order tracking
+- Order placement and tracking
+- Address management
+- Responsive design for all devices
 
-### 👤 User Features
-- User authentication (Login/Register)
-- User profile management
-- Order history
-- Wishlist management
-- Become a seller option
-
-### 💼 Seller Features
+### Seller Features
 - Seller dashboard with analytics
-- Product management (Add/Edit/Delete)
-- Inventory tracking
-- Order management
-- Sales statistics
+- Product management (CRUD operations)
+- Order management and status updates
+- Sales tracking
 
-### 👑 Admin Features
-- Admin dashboard
-- User management (coming soon)
+### Admin Features
+- Admin dashboard with statistics
+- User management (roles, permissions)
+- Order oversight and management
 - Platform-wide analytics
 
-## 🚀 Tech Stack
-
-**Frontend:**
-- React 18
-- Vite
-- Tailwind CSS
-- Framer Motion
-- React Router DOM
-- Axios
-- React Hot Toast
-- Lucide React Icons
-
-**Backend:**
-- Node.js
-- Express.js
-- PostgreSQL
-- Sequelize ORM
-- JWT Authentication
-- B crypt
-
-## 📦 Installation
-
-### Prerequisites
-- Node.js (v16+)
-- PostgreSQL database
-- npm or yarn
-
-### Setup
-
-1. **Clone the repository**
-```bash
-git clone <your-repo-url>
-cd E-Commerce
-```
-
-2. **Install backend dependencies**
-```bash
-npm install
-```
-
-3. **Install frontend dependencies**
-```bash
-cd frontend
-npm install
-cd ..
-```
-
-4. **Configure environment variables**
-Create a `.env` file in the root directory:
-```env
-PORT=8000
-DATABASE_URL=postgresql://username:password@localhost:5432/ecommerce
-JWT_SECRET=your-secret-key
-LOG=true
-```
-
-5. **Run database migrations**
-```bash
-# Set up your PostgreSQL database and run migrations
-```
-
-6. **Start the application**
-
-Terminal 1 - Backend:
-```bash
-npm run dev
-```
-
-Terminal 2 - Frontend:
-```bash
-cd frontend
-npm run dev
-```
-
-The frontend will be available at `http://localhost:5173`
-The backend API will run on `http://localhost:8000`
-
-## 🎯 Project Structure
+## Project Structure
 
 ```
 E-Commerce/
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── pages/
+│   │   └── services/
+│   └── package.json
 ├── backend/
 │   ├── src/
 │   │   ├── controllers/
 │   │   ├── models/
-│   │   ├── routes/
-│   │   ├── middlewares/
-│   │   └── config/
-│   └── ...
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── layout/
-│   │   │   └── ProductCard.jsx
-│   │   ├── context/
-│   │   │   ├── AuthContext.jsx
-│   │   │   └── CartContext.jsx
-│   │   ├── pages/
-│   │   │   ├── auth/
-│   │   │   ├── user/
-│   │   │   ├── seller/
-│   │   │   └── admin/
-│   │   ├── services/
-│   │   │   └── api.js
-│   │   ├── App.jsx
-│   │   └── index.css
-│   └── ...
+│   │   └── routes/
+│   └── package.json
 └── README.md
 ```
 
-## 🔑 Key Features Explained
+## Installation
 
-### Authentication
-- JWT-based authentication
-- Role-based access control (User, Seller, Admin)
-- Protected routes
-- Automatic token refresh
+### Prerequisites
+- Node.js (v18+)
+- PostgreSQL
 
-### Product Management
-- CRUD operations for products
-- Image URL support
-- Stock management
-- Product activation/deactivation
-- Featured products
+### Setup
 
-### Shopping Cart
-- Backend-synced cart
-- Persistent cart data
-- Real-time price calculations
-- Quantity management
+1. Clone the repository
+```bash
+git clone https://github.com/Khushwant2808/e-commerce.git
+cd e-commerce
+```
 
-### Orders
-- Complete checkout flow
-- Order tracking
-- Order history
-- Status updates
+2. Install dependencies
+```bash
+npm install
+```
 
-## 🎨 Design System
+3. Configure environment variables in backend/.env and frontend/.env
 
-The application uses a comprehensive design system with:
-- Glass morphism effects
-- Custom color gradients
-- Reusable component classes
-- Consistent spacing and typography
-- Smooth transitions and animations
+4. Initialize database
+```bash
+cd backend && npm run db:sync && npm run seed
+```
 
-Key  CSS classes:
-- `glass` / `glass-card` - Glassmorphism effects
-- `btn-primary` / `btn-secondary` - Button styles
-- `gradient-text` - Gradient text effects
-- `stat-card` - Statistics cards
-- `badge-*` - Status badges
-
-## 📱 Pages
-
-**Public Pages:**
-- Home
-- Products (with filters)
-- Product Detail
-- Cart
-- Login/Register
-
-**User Pages:**
-- Profile
-- Orders
-- Order Detail
-- Wishlist
-
-**Seller Pages:**
-- Dashboard
-- Products Management
-- Add/Edit Product
-- Orders
-
-**Admin Pages:**
-- Dashboard
-- User Management
-- Order Management
-
-## 🔐 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/api/profile` - Get user profile
-- `PUT /api/auth/become-seller` - Upgrade to seller
-
-### Products
-- `GET /api/products` - Get all products (with pagination, search, filters)
-- `GET /api/products/:id` - Get single product
-- `POST /api/products` - Create product (seller only)
-- `PUT /api/products/meta` - Update product metadata
-- `PUT /api/products/stock` - Update product stock
-- `DELETE /api/products/:id` - Delete product
-- `GET /api/products/show` - Get seller's products
-
-### Cart
-- `GET /api/cart` - Get cart items
-- `POST /api/cart` - Update cart
-
-### Orders
-- `POST /api/orders` - Create order
-- `GET /api/orders` - Get user orders
-- `GET /api/orders/:id` - Get order details
-- `PUT /api/orders/:id/cancel` - Cancel order
-
-### Wishlist
-- `GET /api/wish` - Get wishlist
-- `POST /api/wish` - Toggle wishlist item
-
-### Reviews
-- `GET /api/review/:productId` - Get product reviews
-- `POST /api/review` - Add review
-- `PUT /api/review` - Update review
-
-## 🎨 Customization
-
-### Colors
-Edit `frontend/tailwind.config.js` to customize the color scheme.
-
-### Animations
-Modify `frontend/src/index.css` to adjust animations and transitions.
-
-## 📄 License
-
-This project is private and proprietary.
-
-## 🤝 Contributing
-
-This is a private project. Contact the owner for contribution guidelines.
-
-## 📧 Support
-
-For support, email your.email@example.com
-
----
-
-Built with ❤️ using React, Vite, and Tailwind CSS
+5. Start development servers
+```bash
+npm run dev
+```

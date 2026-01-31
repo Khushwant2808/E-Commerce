@@ -13,7 +13,6 @@ const ProductCard = ({ product, isWishlisted: initialWishlisted = false, onWishl
     const [isWishlisted, setIsWishlisted] = useState(initialWishlisted);
     const [isToggling, setIsToggling] = useState(false);
 
-    // Sync with parent's wishlist state
     useEffect(() => {
         setIsWishlisted(initialWishlisted);
     }, [initialWishlisted]);
@@ -99,7 +98,7 @@ const ProductCard = ({ product, isWishlisted: initialWishlisted = false, onWishl
                         </div>
                     )}
                     {product.stock === 0 && (
-                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center rounded-xl">
                             <span className="badge-error text-lg">Out of Stock</span>
                         </div>
                     )}

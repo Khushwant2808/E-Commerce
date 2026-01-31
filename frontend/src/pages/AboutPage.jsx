@@ -5,7 +5,6 @@ import { Shield, Target, Users, Award, Rocket, Heart, Zap, Globe } from 'lucide-
 const AboutPage = () => {
     return (
         <div className="page-container">
-            {/* Hero Section */}
             <section className="relative py-20 overflow-hidden hero-gradient">
                 <div className="absolute inset-0">
                     <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float"></div>
@@ -28,7 +27,6 @@ const AboutPage = () => {
                 </div>
             </section>
 
-            {/* Vision & Mission */}
             <section className="section-container py-24">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     <motion.div
@@ -63,7 +61,6 @@ const AboutPage = () => {
                 </div>
             </section>
 
-            {/* Core Values */}
             <section className="bg-white/5 py-24">
                 <div className="section-container text-center mb-16">
                     <h2 className="text-4xl font-bold mb-4">Core <span className="gradient-text">Values</span></h2>

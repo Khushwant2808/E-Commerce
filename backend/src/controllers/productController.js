@@ -27,10 +27,6 @@ async function addProduct(req, res, next) {
       userId
     });
 
-    if (process.env.LOG !== "false") {
-      console.log("Product Added");
-    }
-
     return res.status(201).json({
       message: "Product added successfully",
       product
@@ -49,8 +45,8 @@ async function getProducts(req, res, next) {
     if (limit < 1) limit = 10;
 
     const offset = (page - 1) * limit;
-    const { search, minPrice, maxPrice, category } = req.query;
-    const where = { isActive: true }; // Only show active products to users
+    const { search, minPrice, maxPrice } = req.query;
+    const where = { isActive: true };
 
     if (search) {
       where.name = { [Op.iLike]: `%${search}%` };
@@ -62,8 +58,6 @@ async function getProducts(req, res, next) {
       if (maxPrice) where.price[Op.lte] = parseFloat(maxPrice);
     }
 
-    console.log('[Products] Search query:', { search, minPrice, maxPrice, page, limit });
-
     const { count, rows } = await Product.findAndCountAll({
       where,
       limit,
@@ -71,9 +65,6 @@ async function getProducts(req, res, next) {
       order: [["createdAt", "DESC"]]
     });
 
-    console.log('[Products] Found', count, 'products');
-
-    // Return empty array instead of 404 for better UX
     return res.status(200).json({
       totalItems: count,
       totalPages: Math.ceil(count / limit),
@@ -81,7 +72,6 @@ async function getProducts(req, res, next) {
       products: rows
     });
   } catch (error) {
-    console.error('[Products] Error fetching products:', error.message);
     next(error);
   }
 }
@@ -89,7 +79,6 @@ async function getProducts(req, res, next) {
 async function getProductById(req, res, next) {
   try {
     const { id } = req.params;
-    console.log('[Products] Fetching product by ID:', id);
 
     const product = await Product.findOne({
       where: { id },
@@ -102,24 +91,19 @@ async function getProductById(req, res, next) {
     });
 
     if (!product) {
-      console.log('[Products] Product not found:', id);
       return res.status(404).json({ message: "Product not found" });
     }
 
     if (!product.isActive) {
-      // Check if user is the owner or admin
       const isOwner = req.user && (req.user.id === product.userId || req.user.role === 'admin');
 
       if (!isOwner) {
-        console.log('[Products] Product is inactive:', id);
         return res.status(404).json({ message: "Product not available" });
       }
     }
 
-    console.log('[Products] Product fetched successfully:', product.name);
     return res.status(200).json(product);
   } catch (error) {
-    console.error('[Products] Error fetching product:', error.message);
     next(error);
   }
 }
@@ -150,7 +134,7 @@ async function updateStock(req, res, next) {
     }
 
     if (!product) {
-      return res.status(404).json({ message: "Product not found or stock not provided" });
+      return res.status(404).json({ message: "Product not found" });
     }
 
     if (product.userId !== userId) {
@@ -163,10 +147,6 @@ async function updateStock(req, res, next) {
 
     product.stock = stock;
     await product.save();
-
-    if (process.env.LOG !== "false") {
-      console.log("Stock Updated");
-    }
 
     return res.status(200).json({
       message: "Stock updated successfully",
@@ -193,18 +173,7 @@ async function updateProductMeta(req, res, next) {
     }
 
     if (product.userId !== userId) {
-      console.log('[Products] Unauthorized update attempt by user:', userId, 'on product:', id);
       return res.status(403).json({ message: "You are not authorized to update this product" });
-    }
-
-    if (
-      imageUrl === undefined &&
-      isActive === undefined &&
-      isFeatured === undefined &&
-      description === undefined &&
-      price === undefined
-    ) {
-      return res.status(400).json({ message: "No fields provided for update" });
     }
 
     if (imageUrl !== undefined) product.imageUrl = imageUrl;
@@ -245,7 +214,7 @@ async function deleteProduct(req, res, next) {
 
     await product.destroy();
 
-    return res.status(200).json({ message: "Product deleted (softly)" });
+    return res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
     next(error);
   }

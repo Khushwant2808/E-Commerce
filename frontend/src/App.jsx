@@ -7,7 +7,6 @@ import DashboardLayout from './components/layout/DashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/common/ScrollToTop';
 
-// Pages
 import HomePage from './pages/HomePage';
 import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -25,14 +24,12 @@ import AddressPage from './pages/user/AddressPage';
 import ContactPage from './pages/ContactPage';
 import TermsPage from './pages/TermsPage';
 
-// Seller Pages
 import SellerDashboard from './pages/seller/SellerDashboard';
 import SellerProducts from './pages/seller/SellerProducts';
 import SellerOrders from './pages/seller/SellerOrders';
 import AddProductPage from './pages/seller/AddProductPage';
 import EditProductPage from './pages/seller/EditProductPage';
 
-// Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminOrders from './pages/admin/AdminOrders';
@@ -44,7 +41,6 @@ function App() {
             <AuthProvider>
                 <CartProvider>
                     <Routes>
-                        {/* Public Routes */}
                         <Route element={<MainLayout />}>
                             <Route index element={<HomePage />} />
                             <Route path="/products" element={<ProductsPage />} />
@@ -56,7 +52,6 @@ function App() {
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/register" element={<RegisterPage />} />
 
-                            {/* Protected User Routes */}
                             <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
                             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                             <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
@@ -66,7 +61,6 @@ function App() {
                             <Route path="/profile/addresses" element={<ProtectedRoute><AddressPage /></ProtectedRoute>} />
                         </Route>
 
-                        {/* Seller Routes */}
                         <Route path="/seller" element={<ProtectedRoute seller><DashboardLayout /></ProtectedRoute>}>
                             <Route index element={<SellerDashboard />} />
                             <Route path="products" element={<SellerProducts />} />
@@ -75,18 +69,15 @@ function App() {
                             <Route path="orders" element={<SellerOrders />} />
                         </Route>
 
-                        {/* Admin Routes */}
                         <Route path="/admin" element={<ProtectedRoute admin><DashboardLayout /></ProtectedRoute>}>
                             <Route index element={<AdminDashboard />} />
                             <Route path="users" element={<AdminUsers />} />
                             <Route path="orders" element={<AdminOrders />} />
                         </Route>
 
-                        {/* Catch-all */}
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
 
-                    {/* Toast Notifications - Bottom Center */}
                     <Toaster
                         position="bottom-center"
                         toastOptions={{

@@ -33,9 +33,9 @@ const TermsPage = () => {
 
     return (
         <div className="page-container">
-            <div className="max-w-4xl mx-auto px-4 py-16">
+            <div className="max-w-4xl mx-auto px-4 py-10">
                 {/* Header */}
-                <div className="text-center mb-16">
+                <div className="text-center mb-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}

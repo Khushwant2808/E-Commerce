@@ -61,7 +61,6 @@ async function getAddresses(req, res, next) {
 
     console.log('[Address] Found', addresses.length, 'addresses');
 
-    // Return empty array for better UX (allows frontend to show "Add Address" prompt)
     return res.status(200).json(addresses);
   } catch (error) {
     console.error('[Address] Error fetching addresses:', error.message);
