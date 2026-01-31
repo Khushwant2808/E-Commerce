@@ -239,14 +239,28 @@ async function updateOrderItemStatus(req, res, next) {
   try {
     const { itemId } = req.params;
     const { status } = req.body;
+    const sellerId = req.user.id;
+
+    console.log(`[Orders] Seller ${sellerId} updating item ${itemId} to ${status}`);
 
     const allowed = ["pending", "shipped", "delivered", "cancelled", "returned"];
     if (!allowed.includes(status)) {
       return res.status(400).json({ message: "Invalid status value" });
     }
 
-    const orderItem = await OrderItem.findByPk(itemId);
+    const orderItem = await OrderItem.findByPk(itemId, {
+      include: [{
+        model: Product,
+        attributes: ['userId']
+      }]
+    });
+
     if (!orderItem) return res.status(404).json({ message: "Order Item not found" });
+
+    // Verify ownership
+    if (orderItem.Product.userId !== sellerId) {
+      return res.status(403).json({ message: "You do not have permission to update this item's status" });
+    }
 
     if (status === "delivered") {
       const order = await Order.findByPk(orderItem.orderId);

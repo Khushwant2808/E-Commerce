@@ -81,25 +81,40 @@ const OrderDetailPage = () => {
                     </div>
 
                     <div className="glass-card">
-                        <h3 className="text-xl font-bold mb-4">Items</h3>
-                        <div className="space-y-4">
+                        <h3 className="text-xl font-bold mb-6">Items in this Order</h3>
+                        <div className="space-y-6">
                             {order.orderItems?.map((item) => (
-                                <div key={item.id} className="flex gap-4 pb-4 border-b border-white/10 last:border-0">
-                                    <img
-                                        src={item.Product?.imageUrl || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100'}
-                                        alt={item.Product?.name}
-                                        className="w-20 h-20 object-cover rounded-lg"
-                                    />
-                                    <div className="flex-1">
-                                        <p className="font-semibold">{item.Product?.name}</p>
-                                        <p className="text-gray-400 text-sm">Quantity: {item.quantity}</p>
-                                        <p className="text-purple-400 font-semibold mt-1">
-                                            ${parseFloat(item.price).toFixed(2)} × {item.quantity}
+                                <div key={item.id} className="group flex flex-wrap gap-6 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all">
+                                    <div className="w-24 h-24 rounded-xl overflow-hidden bg-white/5">
+                                        <img
+                                            src={item.Product?.imageUrl || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100'}
+                                            alt={item.Product?.name}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        />
+                                    </div>
+                                    <div className="flex-1 min-w-[200px]">
+                                        <h4 className="font-bold text-lg mb-1">{item.Product?.name}</h4>
+                                        <div className="flex items-center gap-4 text-sm text-gray-400">
+                                            <span>Qty: <span className="text-white">{item.quantity}</span></span>
+                                            <span>Price: <span className="text-white">${parseFloat(item.price).toFixed(2)}</span></span>
+                                        </div>
+
+                                        <div className="mt-3 flex items-center gap-2">
+                                            <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${item.status === 'delivered' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                                    item.status === 'shipped' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                                                        item.status === 'cancelled' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                                            'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                                }`}>
+                                                {item.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="text-right flex flex-col justify-center">
+                                        <p className="text-xs text-gray-500 uppercase font-bold">Subtotal</p>
+                                        <p className="text-xl font-black text-white">
+                                            ${(parseFloat(item.price) * item.quantity).toFixed(2)}
                                         </p>
                                     </div>
-                                    <p className="font-bold">
-                                        ${(parseFloat(item.price) * item.quantity).toFixed(2)}
-                                    </p>
                                 </div>
                             ))}
                         </div>
