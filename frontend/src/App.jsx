@@ -15,6 +15,7 @@ import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import ProfilePage from './pages/user/ProfilePage';
+import AddReviewPage from './pages/user/AddReviewPage';
 import OrdersPage from './pages/user/OrdersPage';
 import WishlistPage from './pages/user/WishlistPage';
 import OrderDetailPage from './pages/user/OrderDetailPage';
@@ -53,6 +54,7 @@ function App() {
                             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                             <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
                             <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
+                            <Route path="/product/:id/review" element={<ProtectedRoute><AddReviewPage /></ProtectedRoute>} />
                             <Route path="/wishlist" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
                         </Route>
 

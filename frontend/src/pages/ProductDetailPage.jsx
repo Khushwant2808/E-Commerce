@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Star, Heart, ShoppingCart, Package, Shield, TruckIcon } from 'lucide-react';
+import { Star, StarHalf, Heart, ShoppingCart, Package, Shield, TruckIcon } from 'lucide-react';
 import { productAPI, reviewAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -103,17 +103,24 @@ const ProductDetailPage = () => {
 
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="flex items-center">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star
-                                            key={i}
-                                            className={`w-5 h-5 ${i < Math.floor(product.rating || 0)
-                                                ? 'fill-yellow-400 text-yellow-400'
-                                                : 'text-gray-600'
-                                                }`}
-                                        />
-                                    ))}
+                                    {[...Array(5)].map((_, i) => {
+                                        const rating = parseFloat(product.rating || 0);
+                                        const fullStars = Math.floor(rating);
+                                        const hasHalfStar = rating % 1 >= 0.5;
+
+                                        if (i < fullStars) {
+                                            return <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />;
+                                        } else if (i === fullStars && hasHalfStar) {
+                                            return <StarHalf key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />;
+                                        } else {
+                                            return <Star key={i} className="w-5 h-5 text-gray-600" />;
+                                        }
+                                    })}
                                 </div>
-                                <span className="text-gray-400">
+                                <span className="text-lg font-semibold text-yellow-400">
+                                    {parseFloat(product.rating || 0).toFixed(1)}
+                                </span>
+                                <span className="text-gray-400 border-l border-white/20 pl-4 ml-2">
                                     {product.ratingCount || 0} reviews
                                 </span>
                             </div>
@@ -188,7 +195,12 @@ const ProductDetailPage = () => {
                 </div>
 
                 <div className="glass-card">
-                    <h2 className="text-2xl font-bold mb-6">Customer Reviews</h2>
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-bold">Customer Reviews</h2>
+                        <Link to={`/product/${product.id}/review`} className="btn-secondary text-sm">
+                            Write a Review
+                        </Link>
+                    </div>
                     {reviews.length === 0 ? (
                         <p className="text-gray-400 text-center py-8">No reviews yet. Be the first to review!</p>
                     ) : (

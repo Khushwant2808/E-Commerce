@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart, Star } from 'lucide-react';
+import { Heart, ShoppingCart, Star, StarHalf } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { wishlistAPI } from '../services/api';
@@ -114,15 +114,19 @@ const ProductCard = ({ product, isWishlisted: initialWishlisted = false, onWishl
 
                     <div className="flex items-center gap-2 mb-3">
                         <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                                <Star
-                                    key={i}
-                                    className={`w-4 h-4 ${i < Math.floor(product.rating || 0)
-                                        ? 'fill-yellow-400 text-yellow-400'
-                                        : 'text-gray-600'
-                                        }`}
-                                />
-                            ))}
+                            {[...Array(5)].map((_, i) => {
+                                const rating = parseFloat(product.rating || 0);
+                                const fullStars = Math.floor(rating);
+                                const hasHalfStar = rating % 1 >= 0.5;
+
+                                if (i < fullStars) {
+                                    return <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />;
+                                } else if (i === fullStars && hasHalfStar) {
+                                    return <StarHalf key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />;
+                                } else {
+                                    return <Star key={i} className="w-4 h-4 text-gray-600" />;
+                                }
+                            })}
                         </div>
                         <span className="text-sm text-gray-400">
                             ({product.ratingCount || 0})
