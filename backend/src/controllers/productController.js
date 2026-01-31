@@ -157,16 +157,12 @@ async function updateStock(req, res, next) {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    const newStock = product.stock + stock;
-    if (newStock < 0) {
-      return res.status(400).json({
-        message: `Insufficient stock. Current: ${product.stock}, Requested reduction: ${Math.abs(stock)}`
-      });
+    if (stock < 0) {
+      return res.status(400).json({ message: "Stock cannot be negative" });
     }
 
-    product.stock += stock;
+    product.stock = stock;
     await product.save();
-    if (product.stock < 0) product.stock = 0;
 
     if (process.env.LOG !== "false") {
       console.log("Stock Updated");
