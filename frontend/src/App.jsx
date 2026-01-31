@@ -19,6 +19,7 @@ import AddReviewPage from './pages/user/AddReviewPage';
 import OrdersPage from './pages/user/OrdersPage';
 import WishlistPage from './pages/user/WishlistPage';
 import OrderDetailPage from './pages/user/OrderDetailPage';
+import AddressPage from './pages/user/AddressPage';
 
 import SellerDashboard from './pages/seller/SellerDashboard';
 import SellerProducts from './pages/seller/SellerProducts';
@@ -56,6 +57,7 @@ function App() {
                             <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
                             <Route path="/product/:id/review" element={<ProtectedRoute><AddReviewPage /></ProtectedRoute>} />
                             <Route path="/wishlist" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
+                            <Route path="/profile/addresses" element={<ProtectedRoute><AddressPage /></ProtectedRoute>} />
                         </Route>
 
                         <Route path="/seller" element={<ProtectedRoute seller><DashboardLayout /></ProtectedRoute>}>

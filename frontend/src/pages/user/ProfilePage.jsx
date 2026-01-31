@@ -76,8 +76,38 @@ const ProfilePage = () => {
     const quickLinks = [
         { label: 'My Orders', icon: Package, path: '/orders', count: stats.orders },
         { label: 'Wishlist', icon: Heart, path: '/wishlist' },
-        { label: 'Addresses', icon: MapPin, path: '/checkout', count: stats.addresses },
+        { label: 'Addresses', icon: MapPin, path: '/profile/addresses', count: stats.addresses },
     ];
+
+    if (loading) {
+        return (
+            <div className="page-container">
+                <div className="section-container max-w-5xl mx-auto animate-pulse">
+                    {/* Header Skeleton */}
+                    <div className="glass-card mb-8 h-48 flex items-center gap-8 relative overflow-hidden">
+                        <div className="w-32 h-32 bg-white/5 rounded-3xl ml-8"></div>
+                        <div className="flex-1 space-y-4">
+                            <div className="h-10 bg-white/5 w-64 rounded"></div>
+                            <div className="h-6 bg-white/5 w-48 rounded"></div>
+                            <div className="h-6 bg-white/5 w-40 rounded"></div>
+                        </div>
+                    </div>
+                    {/* Stats Skeleton */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="glass-card h-32 bg-white/5"></div>
+                        ))}
+                    </div>
+                    {/* Links Skeleton */}
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="glass-card h-24 bg-white/5"></div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="page-container">
@@ -224,9 +254,9 @@ const ProfilePage = () => {
                             key={link.label}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 + i * 0.1 }}
+                            transition={{ delay: 0.2 + i * 0.1 }}
                             onClick={() => navigate(link.path)}
-                            className="glass-card flex items-center justify-between group hover:border-purple-500/50 transition-all"
+                            className="glass-card w-full flex items-center justify-between group hover:border-purple-500/50 transition-all"
                         >
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center">
@@ -249,12 +279,10 @@ const ProfilePage = () => {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
-                        className="relative overflow-hidden rounded-2xl"
+                        transition={{ delay: 0.4 }}
+                        className="relative overflow-hidden rounded-2xl glass-card"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/30 to-blue-600/30" />
-                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIgY3g9IjIwIiBjeT0iMjAiIHI9IjIiLz48L2c+PC9zdmc+')] opacity-50" />
-
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-3xl rounded-full -mr-32 -mt-32"></div>
                         <div className="relative p-8 text-center">
                             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
                                 <Store className="w-8 h-8" />
@@ -282,7 +310,7 @@ const ProfilePage = () => {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
+                        transition={{ delay: 0.4 }}
                         className="glass-card"
                     >
                         <div className="flex items-center justify-between mb-6">
@@ -311,7 +339,7 @@ const ProfilePage = () => {
                     </motion.div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 
