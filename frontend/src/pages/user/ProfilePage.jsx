@@ -114,8 +114,6 @@ const ProfilePage = () => {
             <div className="section-container max-w-5xl mx-auto">
                 {/* Header */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
                     className="glass-card mb-8 overflow-hidden relative"
                 >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-3xl rounded-full -mr-32 -mt-32"></div>
@@ -233,9 +231,6 @@ const ProfilePage = () => {
                     ].map((stat, i) => (
                         <motion.div
                             key={stat.label}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
                             className="glass-card text-center"
                         >
                             <div className={`w-12 h-12 mx-auto mb-3 rounded-xl bg-${stat.color}-500/20 flex items-center justify-center`}>
@@ -252,9 +247,6 @@ const ProfilePage = () => {
                     {quickLinks.map((link, i) => (
                         <motion.button
                             key={link.label}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 + i * 0.1 }}
                             onClick={() => navigate(link.path)}
                             className="glass-card w-full flex items-center justify-between group hover:border-purple-500/50 transition-all"
                         >
@@ -277,8 +269,6 @@ const ProfilePage = () => {
                 {/* Seller CTA (if not seller) */}
                 {!isSeller && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
                         className="relative overflow-hidden rounded-2xl glass-card"
                     >
@@ -308,8 +298,6 @@ const ProfilePage = () => {
                 {/* Seller Dashboard Preview (if seller) */}
                 {isSeller && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
                         className="glass-card"
                     >

@@ -69,8 +69,6 @@ const WishlistPage = () => {
 
                 {wishlist.length === 0 ? (
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
                         className="glass-card text-center py-20 max-w-2xl mx-auto"
                     >
                         <Heart className="w-24 h-24 mx-auto mb-6 text-gray-700" />
@@ -90,8 +88,6 @@ const WishlistPage = () => {
                                 <motion.div
                                     layout
                                     key={item.productId}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.3 } }}
                                     whileHover={{ y: -8 }}
                                     className="glass-card p-0 overflow-hidden group relative"

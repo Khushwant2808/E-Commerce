@@ -113,8 +113,6 @@ const AddressPage = () => {
                     {addresses.map((addr) => (
                         <motion.div
                             key={addr.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
                             className="glass-card relative overflow-hidden group"
                         >
                             <div className="absolute top-0 right-0 p-32 bg-gradient-to-br from-blue-500/10 to-purple-500/10 blur-2xl rounded-full -mr-16 -mt-16 pointer-events-none" />
