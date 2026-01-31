@@ -5,7 +5,9 @@ import { CartProvider } from './context/CartContext';
 import MainLayout from './components/layout/MainLayout';
 import DashboardLayout from './components/layout/DashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import ScrollToTop from './components/common/ScrollToTop';
 
+// Pages
 import HomePage from './pages/HomePage';
 import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -20,16 +22,17 @@ import OrdersPage from './pages/user/OrdersPage';
 import WishlistPage from './pages/user/WishlistPage';
 import OrderDetailPage from './pages/user/OrderDetailPage';
 import AddressPage from './pages/user/AddressPage';
+import ContactPage from './pages/ContactPage';
+import TermsPage from './pages/TermsPage';
 
+// Seller Pages
 import SellerDashboard from './pages/seller/SellerDashboard';
 import SellerProducts from './pages/seller/SellerProducts';
 import SellerOrders from './pages/seller/SellerOrders';
 import AddProductPage from './pages/seller/AddProductPage';
 import EditProductPage from './pages/seller/EditProductPage';
 
-import ContactPage from './pages/ContactPage';
-import TermsPage from './pages/TermsPage';
-
+// Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminOrders from './pages/admin/AdminOrders';
@@ -37,9 +40,11 @@ import AdminOrders from './pages/admin/AdminOrders';
 function App() {
     return (
         <BrowserRouter>
+            <ScrollToTop />
             <AuthProvider>
                 <CartProvider>
                     <Routes>
+                        {/* Public Routes */}
                         <Route element={<MainLayout />}>
                             <Route index element={<HomePage />} />
                             <Route path="/products" element={<ProductsPage />} />
@@ -48,10 +53,11 @@ function App() {
                             <Route path="/contact" element={<ContactPage />} />
                             <Route path="/terms" element={<TermsPage />} />
                             <Route path="/cart" element={<CartPage />} />
-                            <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/register" element={<RegisterPage />} />
 
+                            {/* Protected User Routes */}
+                            <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
                             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                             <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
                             <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
@@ -60,6 +66,7 @@ function App() {
                             <Route path="/profile/addresses" element={<ProtectedRoute><AddressPage /></ProtectedRoute>} />
                         </Route>
 
+                        {/* Seller Routes */}
                         <Route path="/seller" element={<ProtectedRoute seller><DashboardLayout /></ProtectedRoute>}>
                             <Route index element={<SellerDashboard />} />
                             <Route path="products" element={<SellerProducts />} />
@@ -68,24 +75,31 @@ function App() {
                             <Route path="orders" element={<SellerOrders />} />
                         </Route>
 
+                        {/* Admin Routes */}
                         <Route path="/admin" element={<ProtectedRoute admin><DashboardLayout /></ProtectedRoute>}>
                             <Route index element={<AdminDashboard />} />
                             <Route path="users" element={<AdminUsers />} />
                             <Route path="orders" element={<AdminOrders />} />
                         </Route>
 
+                        {/* Catch-all */}
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
 
+                    {/* Toast Notifications - Bottom Center */}
                     <Toaster
-                        position="top-right"
+                        position="bottom-center"
                         toastOptions={{
                             duration: 3000,
                             style: {
-                                background: 'rgba(0, 0, 0, 0.9)',
+                                background: 'rgba(15, 15, 15, 0.95)',
                                 color: '#fff',
                                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                                backdropFilter: 'blur(10px)',
+                                backdropFilter: 'blur(20px)',
+                                borderRadius: '16px',
+                                padding: '16px 20px',
+                                fontSize: '14px',
+                                boxShadow: '0 20px 50px -20px rgba(0, 0, 0, 0.5)',
                             },
                             success: {
                                 iconTheme: {

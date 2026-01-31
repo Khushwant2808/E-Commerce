@@ -78,7 +78,7 @@ const ProductCard = ({ product, isWishlisted: initialWishlisted = false, onWishl
                         alt={product.name}
                         className="card-product-image"
                     />
-                    <div className="absolute top-3 right-3 flex flex-col gap-2">
+                    <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
                         <button
                             onClick={toggleWishlist}
                             disabled={isToggling}
