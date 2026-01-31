@@ -35,6 +35,9 @@ async function register(req, res, next) {
 
     console.log('[Auth] User registered:', user.email, 'ID:', user.id);
 
+    // Reload user to get default values (role, canSell) from DB
+    await user.reload();
+
     // Generate JWT token for immediate login
     const token = jwt.sign(
       {
@@ -234,7 +237,6 @@ async function becomeSeller(req, res, next) {
       }
     });
   } catch (error) {
-    await transaction?.rollback();
     next(error);
   }
 }
