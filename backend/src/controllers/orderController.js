@@ -265,21 +265,10 @@ async function updateOrderItemStatus(req, res, next) {
     if (status === "delivered") {
       const order = await Order.findByPk(orderItem.orderId);
 
-      if (order.paymentStatus === "failed") {
-        return res.status(400).json({ message: "Cannot deliver. Payment has failed." });
-      }
-
       if (order.paymentStatus !== "paid") {
-        const lastPayment = await Payment.findOne({
-          where: { orderId: order.id },
-          order: [["createdAt", "DESC"]]
+        return res.status(400).json({
+          message: "Cannot mark delivered. Payment is not completed."
         });
-
-        if (!lastPayment || lastPayment.method === "online") {
-          return res.status(400).json({
-            message: "Cannot mark delivered. Order is not paid (Online Pending)."
-          });
-        }
       }
     }
 
