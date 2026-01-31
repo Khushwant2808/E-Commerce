@@ -3,18 +3,33 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { addressAPI, orderAPI } from '../../services/api';
-import { User, Store, Mail, Package, MapPin, Heart, Clock, ArrowRight, ChevronRight, ShieldCheck, TrendingUp } from 'lucide-react';
+import { User, Store, Mail, Package, MapPin, Heart, Clock, ArrowRight, ChevronRight, ShieldCheck, TrendingUp, Settings } from 'lucide-react';
 
 const ProfilePage = () => {
-    const { user, isSeller, becomeSeller } = useAuth();
+    const { user, isSeller, becomeSeller, updateProfile } = useAuth();
     const navigate = useNavigate();
     const [stats, setStats] = useState({ orders: 0, addresses: 0 });
     const [loading, setLoading] = useState(true);
     const [becomingSelller, setBecomingSeller] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({
+        name: user?.name || '',
+        email: user?.email || '',
+        phone: user?.phone || ''
+    });
+    const [updating, setUpdating] = useState(false);
 
     useEffect(() => {
         fetchStats();
     }, []);
+
+    useEffect(() => {
+        setFormData({
+            name: user?.name || '',
+            email: user?.email || '',
+            phone: user?.phone || ''
+        });
+    }, [user]);
 
     const fetchStats = async () => {
         try {
@@ -30,6 +45,19 @@ const ProfilePage = () => {
             console.error('Failed to fetch stats:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleUpdateProfile = async (e) => {
+        e.preventDefault();
+        setUpdating(true);
+        try {
+            const result = await updateProfile(formData);
+            if (result.success) {
+                setIsEditing(false);
+            }
+        } finally {
+            setUpdating(false);
         }
     };
 
@@ -58,68 +86,108 @@ const ProfilePage = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="glass-card mb-8"
+                    className="glass-card mb-8 overflow-hidden relative"
                 >
-                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-3xl rounded-full -mr-32 -mt-32"></div>
+                    <div className="flex flex-col md:flex-row items-center md:items-start gap-8 relative z-10">
                         {/* Avatar */}
-                        <div className="w-24 h-24 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/30">
-                            <User className="w-12 h-12" />
+                        <div className="relative group">
+                            <div className="w-32 h-32 bg-gradient-to-br from-purple-600 to-blue-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-purple-500/20 group-hover:scale-105 transition-transform duration-300">
+                                <User className="w-16 h-16 text-white" />
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-[#0a0a0a] z-10"></div>
                         </div>
 
                         {/* User Info */}
                         <div className="flex-1 text-center md:text-left">
-                            <h1 className="text-3xl font-bold mb-2">{user?.name}</h1>
-                            <div className="flex items-center justify-center md:justify-start gap-2 text-gray-400 mb-4">
-                                <Mail className="w-4 h-4" />
-                                <span>{user?.email}</span>
-                            </div>
-
-                            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                                <span className={`px-4 py-2 rounded-full text-sm font-medium ${isSeller
-                                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                        : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                                    }`}>
-                                    <Store className="w-4 h-4 inline mr-2" />
-                                    {isSeller ? 'Seller Account' : 'Customer Account'}
-                                </span>
-                                {user?.role === 'admin' && (
-                                    <span className="px-4 py-2 rounded-full text-sm font-medium bg-red-500/20 text-red-400 border border-red-500/30">
-                                        <ShieldCheck className="w-4 h-4 inline mr-2" />
-                                        Admin
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Action Button */}
-                        <div className="flex flex-col gap-3">
-                            {isSeller ? (
-                                <button
-                                    onClick={() => navigate('/seller')}
-                                    className="btn-primary flex items-center gap-2"
-                                >
-                                    <TrendingUp className="w-5 h-5" />
-                                    Seller Dashboard
-                                    <ArrowRight className="w-4 h-4" />
-                                </button>
+                            {isEditing ? (
+                                <form onSubmit={handleUpdateProfile} className="space-y-4 max-w-md">
+                                    <div>
+                                        <label className="text-xs uppercase tracking-widest text-gray-400 mb-1 block">Full Name</label>
+                                        <input
+                                            type="text"
+                                            value={formData.name}
+                                            onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                            className="input-field"
+                                            placeholder="Your Name"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs uppercase tracking-widest text-gray-400 mb-1 block">Email Address</label>
+                                        <input
+                                            type="email"
+                                            value={formData.email}
+                                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                            className="input-field"
+                                            placeholder="your@email.com"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs uppercase tracking-widest text-gray-400 mb-1 block">Phone Number</label>
+                                        <input
+                                            type="tel"
+                                            value={formData.phone}
+                                            onChange={e => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                                            className="input-field"
+                                            placeholder="10-digit number"
+                                            maxLength={10}
+                                        />
+                                    </div>
+                                    <div className="flex gap-3 pt-2">
+                                        <button type="submit" disabled={updating} className="btn-primary flex-1">
+                                            {updating ? 'Saving...' : 'Save Changes'}
+                                        </button>
+                                        <button type="button" onClick={() => setIsEditing(false)} className="btn-secondary flex-1">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
                             ) : (
-                                <button
-                                    onClick={handleBecomeSeller}
-                                    disabled={becomingSelller}
-                                    className="btn-primary flex items-center gap-2"
-                                >
-                                    {becomingSelller ? (
-                                        <>
-                                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                                            Processing...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Store className="w-5 h-5" />
-                                            Become a Seller
-                                        </>
-                                    )}
-                                </button>
+                                <>
+                                    <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
+                                        <h1 className="text-4xl font-bold">{user?.name}</h1>
+                                        <span className={`w-fit px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${isSeller
+                                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                            : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                            }`}>
+                                            {isSeller ? 'Seller' : 'Customer'}
+                                        </span>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                        <div className="flex items-center gap-3 text-gray-400">
+                                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                                                <Mail className="w-4 h-4" />
+                                            </div>
+                                            <span>{user?.email}</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 text-gray-400">
+                                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                                                <Package className="w-4 h-4" />
+                                            </div>
+                                            <span>{user?.phone ? user.phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') : 'No phone added'}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                                        <button onClick={() => setIsEditing(true)} className="btn-secondary flex items-center gap-2">
+                                            <Settings className="w-4 h-4" />
+                                            Edit Profile
+                                        </button>
+                                        {isSeller ? (
+                                            <button onClick={() => navigate('/seller')} className="btn-primary flex items-center gap-2">
+                                                <TrendingUp className="w-4 h-4" />
+                                                Seller Dashboard
+                                            </button>
+                                        ) : (
+                                            <button onClick={handleBecomeSeller} disabled={becomingSelller} className="btn-primary">
+                                                {becomingSelller ? 'Processing...' : 'Become a Seller'}
+                                            </button>
+                                        )}
+                                    </div>
+                                </>
                             )}
                         </div>
                     </div>

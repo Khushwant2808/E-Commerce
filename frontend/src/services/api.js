@@ -78,6 +78,12 @@ export const authAPI = {
         return api.get('/auth/profile');
     },
 
+    // PUT /api/auth/update-profile
+    updateProfile: (data) => {
+        console.log('[Auth] Updating user profile');
+        return api.put('/auth/update-profile', data);
+    },
+
     // PUT /api/auth/become-seller
     becomeSeller: () => {
         console.log('[Auth] Upgrading user to seller');
