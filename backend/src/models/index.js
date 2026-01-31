@@ -11,9 +11,13 @@ const OrderItem = require("./OrderItem");
 const Payment = require("./Payment");
 const Review = require("./Review");
 const Wishlist = require("./Wishlist");
+const SupportMessage = require("./SupportMessage");
 
 User.hasOne(PhoneNumber, { as: "PhoneNumber", foreignKey: "userId", onDelete: "CASCADE" });
 PhoneNumber.belongsTo(User, { foreignKey: "userId" });
+
+User.hasMany(SupportMessage, { foreignKey: "userId", onDelete: "CASCADE" });
+SupportMessage.belongsTo(User, { foreignKey: "userId" });
 
 User.hasMany(Address, { foreignKey: "userId", onDelete: "CASCADE" });
 Address.belongsTo(User, { foreignKey: "userId" });
@@ -69,5 +73,6 @@ module.exports = {
   OrderItem,
   Payment,
   Review,
-  Wishlist
+  Wishlist,
+  SupportMessage
 };

@@ -25,6 +25,9 @@ import SellerOrders from './pages/seller/SellerOrders';
 import AddProductPage from './pages/seller/AddProductPage';
 import EditProductPage from './pages/seller/EditProductPage';
 
+import ContactPage from './pages/ContactPage';
+import TermsPage from './pages/TermsPage';
+
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminOrders from './pages/admin/AdminOrders';
@@ -40,6 +43,8 @@ function App() {
                             <Route path="/products" element={<ProductsPage />} />
                             <Route path="/products/:id" element={<ProductDetailPage />} />
                             <Route path="/about" element={<AboutPage />} />
+                            <Route path="/contact" element={<ContactPage />} />
+                            <Route path="/terms" element={<TermsPage />} />
                             <Route path="/cart" element={<CartPage />} />
                             <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
                             <Route path="/login" element={<LoginPage />} />

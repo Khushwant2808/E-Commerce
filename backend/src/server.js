@@ -18,7 +18,7 @@ async function resetDatabase() {
     // await resetDatabase();
     // console.log("Database reset");
 
-    await sequelize.sync({ force: false, alter: false });
+    await sequelize.sync({ force: false, alter: true });
     console.log("Models synced");
 
     // await runSeeds();
