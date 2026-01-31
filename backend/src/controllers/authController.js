@@ -81,7 +81,7 @@ async function login(req, res, next) {
 
     const user = await User.findOne({
       where: { email },
-      include: [PhoneNumber]
+      include: [{ model: PhoneNumber, as: 'PhoneNumber' }]
     });
 
     if (!user) {
